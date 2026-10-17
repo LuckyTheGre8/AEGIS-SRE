@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createOSFromEnvironment } from "@/lib/sandbox/createos";
 import { runSandboxSmokeTest } from "@/lib/sandbox/smoke";
 import type { SmokeResult } from "@/lib/sandbox/smoke-types";
+import { isAllowedRequestOrigin } from "@/lib/http/origin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,13 +18,7 @@ export function GET() {
 }
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  // Next can canonicalize request.url to an internal hostname. The HTTP Host
-  // header retains the host the browser actually requested (including port).
-  const publicUrl = new URL(request.url);
-  const requestedHost = request.headers.get("host");
-  if (requestedHost) publicUrl.host = requestedHost;
-  if ((origin && origin !== publicUrl.origin) || request.headers.get("sec-fetch-site") === "cross-site") {
+  if (!isAllowedRequestOrigin(request)) {
     return NextResponse.json({ error: "Cross-origin smoke tests are not allowed." }, { status: 403, headers });
   }
   if (!request.headers.get("content-type")?.startsWith("application/json")) {

@@ -4,6 +4,7 @@ import { llmFromEnvironment } from "@/lib/agent/gemini";
 import { investigate } from "@/lib/agent/orchestrator";
 import { createOSFromEnvironment } from "@/lib/sandbox/createos";
 import type { InvestigationResult } from "@/lib/investigation/result";
+import { isAllowedRequestOrigin } from "@/lib/http/origin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,11 +16,7 @@ const headers = { "Cache-Control": "no-store" };
 export function GET() { return NextResponse.json(state, { headers }); }
 
 export async function POST(request: Request) {
-  const publicUrl = new URL(request.url);
-  const requestedHost = request.headers.get("host");
-  if (requestedHost) publicUrl.host = requestedHost;
-  const origin = request.headers.get("origin");
-  if ((origin && origin !== publicUrl.origin) || request.headers.get("sec-fetch-site") === "cross-site") return NextResponse.json({ error: "Cross-origin investigations are blocked." }, { status: 403, headers });
+  if (!isAllowedRequestOrigin(request)) return NextResponse.json({ error: "Cross-origin investigations are blocked." }, { status: 403, headers });
   if (!request.headers.get("content-type")?.startsWith("application/json")) return NextResponse.json({ error: "Send a JSON incident and fixture identifier." }, { status: 415, headers });
   let input: unknown;
   try {

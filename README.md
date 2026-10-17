@@ -23,6 +23,8 @@ npm start
 
 ## Run an investigation
 
+For Railway, set the server variable `APP_ORIGIN=https://aegis-sre-production.up.railway.app` and redeploy. `ALLOWED_ORIGIN` is an alternative name, or a second exact allowed origin if both are set. Use a complete HTTP(S) origin without a path, query, wildcard, or credentials. Production browser POSTs fail closed when no valid origin is configured; forwarded host/protocol headers do not grant trust. Localhost/127.0.0.1/::1 same-origin requests remain available only in development. Explicit cross-site requests remain blocked. Non-browser requests without an Origin header retain their existing behavior. This check applies to both execution endpoints.
+
 1. Click **Load demo incident** to populate the synthetic HTTP 502 report.
 2. Click **Investigate**. The server sends incident text, hypotheses, and observed sandbox output to Gemini.
 3. Inspect generated source, hypotheses, policy and actual evidence, then the model root cause/diff and BEFORE 502 → AFTER 200, REGRESSION PASS, FIX STATUS VERIFIED after confirmed cleanup.

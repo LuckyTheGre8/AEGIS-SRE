@@ -143,7 +143,13 @@ test("unsupported live shape stops before any VM allocation", async () => {
   assert.equal(calls.some((call) => call.method === "POST"), false);
 });
 
-test("smoke endpoint rejects cross-origin and arbitrary browser commands before SDK access", async () => {
+test("smoke endpoint rejects cross-origin and arbitrary browser commands before SDK access", async (context) => {
+  const previousMode = process.env.NODE_ENV;
+  Object.assign(process.env, { NODE_ENV: "development" });
+  context.after(() => {
+    if (previousMode === undefined) delete (process.env as Record<string, string | undefined>).NODE_ENV;
+    else Object.assign(process.env, { NODE_ENV: previousMode });
+  });
   const request = (body: string, origin = "http://localhost:3000") => new Request("http://localhost:3000/api/sandbox/smoke", {
     method: "POST", headers: { "Content-Type": "application/json", origin }, body,
   });
