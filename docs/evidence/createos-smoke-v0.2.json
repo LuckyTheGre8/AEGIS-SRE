@@ -1,0 +1,54 @@
+{
+  "id": "6604a054-4143-4943-8393-80e59d4c1a2b",
+  "provider": "createos",
+  "status": "PASSED",
+  "phase": "CLEANUP",
+  "startedAt": "2026-10-17T20:30:25.616Z",
+  "completedAt": "2026-10-17T20:30:29.997Z",
+  "durationMs": 4381,
+  "authenticated": true,
+  "userId": "2d5659a8-ded3-4814-b17e-a85c6df8212b",
+  "sandboxName": "aegis-smoke-db7a8d73d2",
+  "sandbox": {
+    "id": "sb-01m55ry44cqw05q43g91nh8c0c",
+    "name": "aegis-smoke-db7a8d73d2",
+    "shape": "s-2vcpu-4gb",
+    "rootfs": "devbox:1"
+  },
+  "commands": [
+    {
+      "stdout": "Linux aegis-smoke-db7a8d73d2 6.12.95 #1 SMP PREEMPT_DYNAMIC Wed Jul  8 10:59:22 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux\n",
+      "stderr": "",
+      "exitCode": 0,
+      "durationMs": 9.008,
+      "command": "uname",
+      "args": [
+        "-a"
+      ]
+    },
+    {
+      "stdout": "Python 3.13.14\n",
+      "stderr": "",
+      "exitCode": 0,
+      "durationMs": 32.376,
+      "command": "python3",
+      "args": [
+        "--version"
+      ]
+    },
+    {
+      "stdout": "v24.21.0\n",
+      "stderr": "",
+      "exitCode": 0,
+      "durationMs": 109.534,
+      "command": "node",
+      "args": [
+        "--version"
+      ]
+    }
+  ],
+  "cleanup": {
+    "status": "DESTROYED",
+    "sandboxId": "sb-01m55ry44cqw05q43g91nh8c0c"
+  }
+}

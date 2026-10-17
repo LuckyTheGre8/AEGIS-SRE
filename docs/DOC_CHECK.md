@@ -1,5 +1,15 @@
 # Documentation and environment check
 
+## v0.2 update — 18 October 2026
+
+Rechecked the official SDK quickstart and installed current package `0.8.2`. Read the exact client, command, cleanup, catalog, error, and option types/source. The quickstart's `wait: false` and `waitTimeoutMs` guidance is stale for this SDK: the installed API makes creation synchronous and deprecates those options. The adapter uses `timeoutMs` instead. SDK exec outputs map from `result.stdout`, `result.stderr`, `result.exit_code`, and `exec_ms`.
+
+The live account authenticated successfully using the user's saved `.env.local`, without displaying secret values. The live shape/image catalogs include `s-2vcpu-4gb` and `devbox:1`, both used in successful smoke runs. The live API also enforced a 22-character sandbox-name limit that the prompt did not specify; generated names were shortened accordingly. Destruction was confirmed after each successful run. Read [CreateOS operation notes](CREATEOS_SMOKE.md) for details and [the app receipt](evidence/createos-smoke-v0.2.json) for actual command output.
+
+Stripe Projects guidance, status, and redacted environment listing were rechecked. The existing project remains valid and no hosting resource was needed for the local smoke path. Next.js's installed route-handler guide was read before implementation. The SDK is ESM-only; the package now declares ESM so CLI/test imports work. No model APIs were added.
+
+## Original v0.1 check
+
 Checked 18 October 2026 (Asia/Calcutta), before foundation implementation.
 
 ## CLI and project

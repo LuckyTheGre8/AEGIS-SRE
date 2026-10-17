@@ -8,12 +8,13 @@ export function GET() {
     status: "ok",
     service: "aegis-sre",
     version,
-    milestone: "foundation",
+    milestone: "real-createos",
     timestamp: new Date().toISOString(),
     capabilities: {
       incidentPreparation: true,
       investigation: false,
-      sandboxExecution: false,
+      sandboxExecution: true,
+      sandboxConfigured: Boolean(process.env.CREATEOS_SANDBOX_API_KEY?.trim()),
       productionMutation: false,
     },
   }, { headers: { "Cache-Control": "no-store" } });

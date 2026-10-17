@@ -1,5 +1,32 @@
 # Progress
 
+## v0.2.0 — Real CreateOS
+
+Acceptance passed on 18 October 2026 (Asia/Calcutta):
+
+- Official `@nodeops-createos/sandbox` SDK pinned to `0.8.2`, loaded as ESM.
+- `SandboxProvider` abstraction and `CreateOSSandboxProvider` implement authentication, catalog-backed creation, argument-array execution, file upload contract, and confirmed destruction. No local fallback is used.
+- Fixed smoke runner verifies `whoami()`, creates one `devbox:1` sandbox, executes `uname -a`, `python3 --version`, and `node --version`, and captures real stdout/stderr/exitCode/guest durationMs.
+- Destruction runs in `finally`, is confirmed by polling, retries twice on failure, and reports cleanup errors. Ambiguous creation is recovered only by the run's unique name; uncertain cleanup blocks further app runs.
+- `POST /api/sandbox/smoke` executes only the server-owned suite, while `GET` retrieves in-memory status/results. Browser disconnect does not cancel cleanup. The UI displays actual results and can refresh the latest backend receipt.
+- No AI provider, generated tools, diagnosis loop, incident execution, fix verification, deployment, or production mutations were added.
+
+Real acceptance runs:
+
+- CLI: sandbox `sb-01m55rr25djr34h497w1nhn9zq`, all three exits 0, cleanup `DESTROYED`, total 4,761 ms.
+- Production app/browser: run `6604a054-4143-4943-8393-80e59d4c1a2b`, sandbox `sb-01m55ry44cqw05q43g91nh8c0c`, all three exits 0, empty stderr, cleanup `DESTROYED`, total 4,381 ms. Linux `6.12.95`, Python `3.13.14`, Node `v24.21.0`.
+- App result saved verbatim from `GET /api/sandbox/smoke` to [the non-secret acceptance receipt](evidence/createos-smoke-v0.2.json). This is observed output, not a fixture.
+- `/api/health` reports version `0.2.0`, sandbox support/configuration true, and investigation/production mutation false.
+- Browser showed the successful command results and cleanup status; console inspection returned no warnings/errors.
+
+Checks: `npm run lint`, `npm run typecheck`, all **15 tests**, and `npm run build` passed. Existing v0.1 behavior is retained. Unit tests use explicitly synthetic SDK transport responses for failure-path coverage; only the real runs above count as remote execution evidence.
+
+Resolved API/integration differences: the live API's sandbox name limit is 22 characters; SDK `wait`/`waitTimeoutMs` are deprecated no-ops; creation is synchronous; async deletion requires confirmation. A same-origin check uses the public HTTP Host rather than Next.js's canonical internal hostname. See [CreateOS operation notes](CREATEOS_SMOKE.md).
+
+Credentials were supplied by the user in ignored `.env.local`. Values were never printed, logged, passed to the browser, or injected into the VM. Stripe Projects state and redacted credential names were checked; no hosting resource was provisioned. No v0.3 work was undertaken.
+
+Acceptance test servers and one-off CLI processes were stopped after successful cleanup. Run `npm run dev` or `npm start` to reopen the app. The checked-in receipt preserves proof when the in-memory result is cleared by a server restart.
+
 ## v0.1.0 — Foundation
 
 Implemented:

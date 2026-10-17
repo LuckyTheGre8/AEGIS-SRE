@@ -136,6 +136,10 @@ textarea:focus-visible { outline:0; }
 .execution-footer>span:last-child { font-family:var(--font-mono); font-size:7px; }
 .execution-footer b { font-weight:400; color:#a0aaa8; margin-left:3px; }
 .execution-boundary { display:flex; align-items:center; gap:7px; color:#6f7d78; padding:10px 18px; font-size:8px; border-top:1px solid #22292b; }
+.smoke-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px; border-bottom:1px solid var(--border); }
+.smoke-controls>span { width:100%; color:var(--muted); font-family:var(--font-mono); font-size:9px; line-height:1.5; }
+.smoke-terminal { max-height:470px; overflow:auto; }
+.smoke-terminal pre { line-height:1.8; color:#acbaab; }
 .empty-evidence { text-align:center; padding:23px 15px 19px; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .empty-icon { border:1px solid #303a34; background:#1a211c; width:42px; height:42px; display:grid; place-items:center; border-radius:9px; color:#a2b192; margin-bottom:13px; }
 .empty-evidence h3,.validation-copy h3 { margin:0 0 8px; color:#b8c1bb; font-size:12px; font-weight:450; }

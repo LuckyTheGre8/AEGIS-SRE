@@ -1,10 +1,3 @@
-.projects/cache
-.projects/vault
-.projects/state.test.json
-.projects/state.local.test.json
-.env
-.env.*
-!.env.example
 
 # Next.js and local tooling
 node_modules/
@@ -15,3 +8,11 @@ coverage/
 next-env.d.ts
 npm-debug.log*
 .DS_Store
+
+.projects/cache
+.projects/vault
+.projects/state.test.json
+.projects/state.local.test.json
+.env
+.env.*
+!.env.example
