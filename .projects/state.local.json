@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "project": {
+    "catalog": "prod",
+    "merchantId": "acct_1URbbM7FiGhg3ei8",
+    "merchantDisplayName": null,
+    "projectId": "project_61Vb1GjppYyOA0xVU16VazYi8LE9qgQPlhfYMz3hYCgC",
+    "projectName": "Aegis-sre",
+    "initializedAt": "2026-10-17T19:30:32.995Z"
+  },
+  "providers": {},
+  "resources": {}
+}
