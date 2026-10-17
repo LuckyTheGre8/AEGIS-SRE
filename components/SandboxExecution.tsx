@@ -5,6 +5,7 @@ import { useState } from "react";
 import { SmokeResultSchema, SmokeStatusSchema, type SmokeResult } from "@/lib/sandbox/smoke-types";
 import { Panel } from "./Panel";
 import type { InvestigationResult } from "@/lib/investigation/result";
+import { GeneratedDiagnostics } from "./GeneratedDiagnostics";
 
 function formatOutput(result: SmokeResult | null) {
   if (!result) return "# No smoke test run yet.\n# Run the three fixed commands in a real CreateOS sandbox.\n# No incident diagnosis or AI is involved.";
@@ -33,17 +34,9 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
   const [notice, setNotice] = useState("");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
-  const output = investigation ? [
-    `INVESTIGATION ${investigation.id}`,
-    `MODEL ${investigation.model?.provider ?? "unconfigured"} / ${investigation.model?.model ?? "—"}`,
-    `DIAGNOSIS SANDBOX ${investigation.sandboxId ?? "not created"} · STATUS ${investigation.cleanup}`,
-    ...(investigation.validation ? [`VALIDATION SANDBOX ${investigation.validation.validationSandboxId ?? "not created"} · STATUS ${investigation.validation.cleanup}`, `FIX ${investigation.validation.status} · BEFORE ${investigation.validation.beforeStatus ?? "—"} · AFTER ${investigation.validation.afterStatus ?? "—"} · REGRESSION ${investigation.validation.regression}`] : []),
-    ...investigation.tools.map((entry) => `TOOL ${entry.tool?.name ?? "rejected output"} · ${entry.tool?.risk ?? "unclassified"} · POLICY ${entry.decision}\nPURPOSE ${entry.tool?.purpose ?? entry.error}\nCHECKS ${entry.checks.join(", ")}`),
-    ...investigation.evidence.map((evidence) => `\n${evidence.id} · ${evidence.source}\n${evidence.raw ?? evidence.summary}`),
-    `\nCLEANUP ${investigation.cleanup}`,
-    `OUTCOME ${investigation.outcome} · production NOT EXECUTED`,
-  ].join("\n") : formatOutput(result);
-  const source = investigation?.tools.length ? investigation.tools.map((entry) => entry.tool ? `// ${entry.tool.name}\n// Purpose: ${entry.tool.purpose}\n// Risk: ${entry.tool.risk} · Policy: ${entry.decision}\n// ${entry.reason}\n// Checks: ${entry.checks.join(", ")}\n// SHA256: ${entry.sha256}\n${entry.tool.source}` : "# Rejected model output did not pass the tool schema.").join("\n\n") : "# No diagnostic tool generated yet.\n# Investigate the synthetic HTTP 502 fixture to generate one at runtime.";
+  if (investigation) return <GeneratedDiagnostics result={investigation} />;
+  const output = formatOutput(result);
+  const source = "# No diagnostic program has been generated yet.\n# Use Investigate to run the HTTP 502 reference incident.";
 
   async function runSmokeTest() {
     setRunning(true);
@@ -80,12 +73,12 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
   const cleanupBlocked = result && ["FAILED", "UNCONFIRMED"].includes(result.cleanup.status);
   return <Panel title="Sandbox execution" icon={<Terminal size={16} />} className="execution-panel" aside={<span className="subtle-tag">CREATEOS</span>}>
     <div className="smoke-controls">
-      <button className="button primary" disabled={running || !!cleanupBlocked || investigating || !!investigation} onClick={() => void runSmokeTest()}>
+      <button className="button primary" disabled={running || !!cleanupBlocked || investigating} onClick={() => void runSmokeTest()}>
         {running ? <LoaderCircle size={13} className="spin" /> : <Play size={13} />}
         {running ? "Running real smoke test…" : "Run CreateOS smoke test"}
       </button>
-      <button className="icon-button" disabled={!!investigation || investigating} aria-label="Refresh smoke-test result" title="Refresh smoke-test result" onClick={() => void refreshResult()}><RefreshCw size={14} /></button>
-      <span>{investigation ? "Investigation output · reset the incident to use the standalone smoke test" : "whoami → create → execute → destroy"}</span>
+      <button className="icon-button" disabled={investigating} aria-label="Refresh smoke-test result" title="Refresh smoke-test result" onClick={() => void refreshResult()}><RefreshCw size={14} /></button>
+      <span>{"Optional connectivity check · whoami → create → execute → destroy"}</span>
     </div>
     <div className="execution-toolbar"><div className="tabs" role="tablist" aria-label="Execution details">
       <button id="output-tab" role="tab" aria-selected={tab === "output"} aria-controls="execution-content" className={tab === "output" ? "selected" : ""} onClick={() => setTab("output")}><Terminal size={13} />Output</button>
@@ -101,7 +94,7 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
       {notice && <p className="form-error" role="status">{notice}</p>}
       {copyError && <p className="form-error" role="status">{copyError}</p>}
     </div>
-    <div className="execution-footer" role="status" aria-live="polite"><span><span className={`mini-dot ${investigation?.cleanup === "DESTROYED" || result?.status === "PASSED" ? "" : "muted"}`} />{investigating ? "Investigation running" : investigation ? `${investigation.state} · cleanup ${investigation.cleanup}` : running ? "Smoke test running" : result ? `${result.status} · cleanup ${result.cleanup.status}` : "No smoke test run"}</span><span>{investigation ? `${investigation.evidence.length} OBSERVATIONS` : result ? `${result.commands.length}/3 COMMANDS · ${result.durationMs} ms` : "3 FIXED COMMANDS"}</span></div>
+    <div className="execution-footer" role="status" aria-live="polite"><span><span className={`mini-dot ${result?.status === "PASSED" ? "" : "muted"}`} />{investigating ? "Waiting for investigation output" : running ? "Smoke test running" : result ? `${result.status} · cleanup ${result.cleanup.status}` : "No execution yet"}</span><span>{result ? `${result.commands.length}/3 COMMANDS · ${result.durationMs} ms` : "FIXED CONNECTIVITY SUITE"}</span></div>
     <div className="execution-boundary"><Braces size={13} />Real stdout, stderr, exit codes and guest execution durations.</div>
   </Panel>;
 }

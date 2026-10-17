@@ -1,5 +1,19 @@
 # Progress
 
+## v0.6.0 — Demo freeze and submission polish
+
+The investigation orchestrator, Gemini provider/prompts, CreateOS adapter, generated-tool execution, deterministic policy, patch generation, fresh-sandbox validation and cleanup implementations are unchanged from v0.5 plus the deployed origin fix.
+
+Added immediate browser waiting feedback (spinner, indeterminate progress, elapsed time and isolated-environment message), safe GET polling/reconnect, synchronous duplicate-submit protection, actual server errors, retry, stale-response rejection and retention of the previous successful result. No completed investigation phases are invented while waiting. Refresh recovers the actual backend result; storage remains process memory.
+
+The result summary makes the reference incident, supported hypothesis/confidence, BEFORE 502, AFTER 200, regression PASS, VERIFIED, distinct sandbox IDs and human approval boundary prominent. Diagnostic source/purpose/hash/risk/policy/output/exit/duration are readable in the existing workspace, alongside the actual generated diff and cleanup. Sponsor cards describe Gemini, CreateOS Sandbox, Stripe Projects and Railway roles without simulated connection states. README and the [recording guide](DEMO.md) explicitly describe one complete reference incident.
+
+Real browser acceptance on 18 October 2026 (Asia/Calcutta): run `0c7b5d4c-3450-4bd8-a2b2-89ea1d4e4027` completed VERIFIED after refreshing the browser during execution. Diagnosis sandbox `sb-01m55zxc60p2b8f0yyf5xrvye4` and fresh validation sandbox `sb-01m55zxn1457ry26x5qaqtr7sn` were different and both confirmed DESTROYED. Actual 502 → 200, regression PASS, production NOT_EXECUTED. [Observed receipt](evidence/demo-freeze-v0.6.json). A separate local missing-key check showed the actual error, enabled Retry, and allocated no sandbox; saved credentials were not changed.
+
+Public deployment checks found Gemini and CreateOS configuration flags true and an own-origin invalid-input POST reaching body validation (400). The deployed build was still v0.5 during these checks; deploying the v0.6 commit is separate. Stripe Projects reports complete CreateOS and Railway service attachments. No hosting/service changes were made.
+
+Final required checks: lint, strict typecheck, all **37 tests**, and production build passed. New tests cover duplicate submissions, stale polling both before and after POST completion, failed retry/result retention, browser fetch binding, and reconnect/recovery. Local test servers were stopped. One v0.6 polish commit; no new core features.
+
 ## v0.5.0 — Fresh-sandbox fix verification
 
 Acceptance passed on 18 October 2026 (Asia/Calcutta). Gemini generated a minimal guarded config replacement from real v0.4-style diagnostic evidence. A new CreateOS sandbox recreated the original broken fixture, measured HTTP 502, applied the generated patch and acknowledged reload, then ran the identical health test to measure HTTP 200 and regression PASS. Both sandbox destructions were confirmed before final VERIFIED. No production mutation was added.

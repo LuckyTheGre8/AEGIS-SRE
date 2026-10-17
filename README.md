@@ -1,71 +1,77 @@
 # Aegis SRE
 
-**v0.5.0 — Fresh-sandbox fix verification.** Gemini generates a diagnostic and minimal configuration patch from actual synthetic HTTP 502 evidence. Aegis validates the tool and patch, creates a separate CreateOS validation sandbox, reproduces 502, applies/reloads the patch, measures 200, runs regression, and confirms cleanup before calling the fixture fix VERIFIED.
+Aegis is an evidence-driven autonomous SRE that generates its own diagnostic tools, executes them inside isolated CreateOS sandboxes, and verifies fixes in fresh environments before recommending production action.
 
-## Local setup
+**Hackathon prototype · one complete HTTP 502 reference incident.** [Live demo](https://aegis-sre-production.up.railway.app) · [2–3 minute demo guide](docs/DEMO.md) · [Real verification receipt](docs/evidence/patch-validation-v0.5.json)
 
-Use Node.js 22.13 or newer and npm. The UI boots without credentials. Set server-only `GEMINI_API_KEY`, `CREATEOS_SANDBOX_API_KEY`, and your account-issued `CREATEOS_SANDBOX_BASE_URL` in ignored `.env.local`. Optional settings: `GEMINI_MODEL` (default `gemini-3.5-flash-lite`) and `CREATEOS_SANDBOX_SHAPE`. Never add a `NEXT_PUBLIC_` prefix to keys. Restart after changing configuration.
+## Problem
+
+AI diagnosis can be plausible and wrong. Letting an agent experiment directly on production infrastructure turns that uncertainty into operational risk.
+
+## Key idea
+
+**AI can be wrong safely.** Require isolated execution, observable evidence, and fresh-environment verification before recommending action.
+
+## What Aegis does
+
+Incident → hypotheses → generated diagnostic → policy validation → CreateOS execution → evidence → root cause → generated patch → fresh validation sandbox → **502 → 200 → VERIFIED** → human approval boundary.
+
+The UI shows actual generated source, confidence estimates, risk/policy decisions, source hashes, sandbox IDs, stdout/stderr, exit codes, duration, diff, regression, and cleanup. Waiting feedback is indeterminate; completed steps come only from real results.
+
+## Architecture
+
+```text
+User
+  ↓
+Railway-hosted Next.js app
+  ↓
+Investigation orchestrator
+  ├─ Gemini: hypotheses, diagnostic code, minimal patch
+  ├─ Deterministic policy: validate and gate actions
+  └─ CreateOS Sandbox
+      ├─ Diagnosis sandbox: reproduce + collect evidence
+      └─ Fresh validation sandbox: apply + test + clean up
+
+Stripe Projects: provisioning / project / submission layer
+  └─ Attached CreateOS + Railway services
+```
+
+## Demo scenario
+
+The proxy returns **502** while its backend returns **200**. Configuration points upstream to **3001**, but the backend listens on **3000**. A runtime-generated tool discovers the mismatch. Gemini proposes the minimal **3001 → 3000** config replacement. A different sandbox recreates the failure, applies/reloads the patch, and verifies **BEFORE 502 · AFTER 200 · REGRESSION PASS** before reporting **VERIFIED**.
+
+## Safety
+
+Generated tools execute only in disposable CreateOS environments. Zod/schema validation, source-size/syntax checks, and deterministic policy reject dangerous operations. The golden path supports a restricted read-only diagnostic and one guarded fixture-config patch. Verification requires real before/after results, regression, and confirmed cleanup. **Production mutation is disabled. Human approval is required before production action.** Confidence is a model estimate; synthetic evidence is not production evidence.
+
+## Tech stack
+
+Next.js · TypeScript · Zod · Gemini · CreateOS Sandbox · Stripe Projects · Railway.
+
+## Running locally
+
+Use Node.js 22.13+ and npm. Configure server-only variables in ignored `.env.local`:
+
+- `GEMINI_API_KEY`
+- `CREATEOS_SANDBOX_API_KEY`
+- `CREATEOS_SANDBOX_BASE_URL` — your account-issued endpoint
+- `APP_ORIGIN` — public app origin for production browser requests; `ALLOWED_ORIGIN` is an alias/additional exact origin
+
+Optional: `GEMINI_MODEL`, `CREATEOS_SANDBOX_SHAPE`. Never use `NEXT_PUBLIC_` for credentials or paste keys into the UI. Restart after configuration changes.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). The server binds to loopback. This Windows environment uses supported Webpack mode because Turbopack failed to connect its CSS worker; production disk caching is disabled to resolve a repeat-build hashing failure.
+Open localhost:3000, load the demo incident, then Investigate. Development permits same-origin localhost requests. Refreshing reconnects through GET /api/investigate; results are in server memory and clear on server restart. A failed attempt retains the previous successful result in the current page. If a connection drops, confirm backend status before retrying.
 
-```sh
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npm start
-```
+## Deployment
 
-## Run an investigation
+The control plane is deployed on Railway through services attached in Stripe Projects. Configure the server credentials and `APP_ORIGIN` to match the public HTTPS origin exactly. Railway supplies `PORT`; the production command binds to `0.0.0.0`. Unrelated/cross-site origins remain blocked. Origin validation is not authentication; this single-process hackathon app has no user-authentication or durable job layer.
 
-For Railway, set the server variable `APP_ORIGIN=https://aegis-sre-production.up.railway.app` and redeploy. `ALLOWED_ORIGIN` is an alternative name, or a second exact allowed origin if both are set. Use a complete HTTP(S) origin without a path, query, wildcard, or credentials. Production browser POSTs fail closed when no valid origin is configured; forwarded host/protocol headers do not grant trust. Localhost/127.0.0.1/::1 same-origin requests remain available only in development. Explicit cross-site requests remain blocked. Non-browser requests without an Origin header retain their existing behavior. This check applies to both execution endpoints.
+## Current scope
 
-1. Click **Load demo incident** to populate the synthetic HTTP 502 report.
-2. Click **Investigate**. The server sends incident text, hypotheses, and observed sandbox output to Gemini.
-3. Inspect generated source, hypotheses, policy and actual evidence, then the model root cause/diff and BEFORE 502 → AFTER 200, REGRESSION PASS, FIX STATUS VERIFIED after confirmed cleanup.
-4. Use **Refresh investigation result** after a disconnect, or **Reset incident** to clear the browser view.
+The hackathon prototype demonstrates one complete reference incident. The architecture is designed to support additional repository/incident adapters later. It does not diagnose arbitrary production incidents today.
 
-The budget is three model turns, three generated tools total, two tool retries, 20 seconds per command, one diagnosis sandbox and one fresh validation sandbox. Results remain in server memory until restart. The reproducible synthetic fixture runs a real broken proxy (HTTP 502) and healthy backend (HTTP 200), with mismatched upstream configuration. Fixture fixes become **VERIFIED** only after real before/after, patch/reload, regression and cleanup gates pass. Production action remains **NOT_EXECUTED** and requires human approval. See [v0.5 operation and real acceptance](docs/V0.5.md).
-
-`POST /api/investigate` accepts only the validated incident/fixture schema. `GET` returns in-process status and the latest result. The browser cannot submit arbitrary commands or source; generated tools come from the server-side model and pass validation before execution. Gemini is the only LLM implementation; no provider selection infrastructure was added.
-
-## Run the CreateOS smoke test
-
-After resetting the incident, click **Run CreateOS smoke test**. The server verifies `whoami()`, discovers shapes/images, creates one `devbox:1` sandbox with public ingress disabled, runs `uname -a`, `python3 --version`, and `node --version`, and confirms destruction. The panel displays actual stdout, stderr, exitCode, and guest durationMs. This independent v0.2 test does not call a model.
-
-```sh
-npm run smoke:createos
-```
-
-`POST /api/sandbox/smoke` accepts only `{}`; `GET` retrieves the latest in-memory result. See [CreateOS operation and API discrepancies](docs/CREATEOS_SMOKE.md).
-
-## Architecture and boundaries
-
-Next.js App Router, strict TypeScript, React, Tailwind, Zod, Lucide, and official CreateOS Sandbox SDK `0.8.2`. LLMProvider has one Gemini REST implementation. The server validates model decisions and evidence links, applies deterministic policy, executes validated generated JavaScript through a fixed capability runner in CreateOS, and destroys the sandbox in `finally`. Generated code is never executed on the host. Model thought parts are discarded; rationales are limited to 240 characters. Keys never reach browser props or model context.
-
-Policy denies destructive/external-network actions. Generated diagnostics must be READ_ONLY and use only fixed fixture capabilities. Patch policy permits one guarded upstream config replacement inside a new disposable validation sandbox. Production mutations return REQUIRE_APPROVAL without execution. Confidence is a model estimate; fixture observations are explicitly synthetic evidence. See [architecture](docs/ARCHITECTURE.md).
-
-This repository remains initialized as **Aegis-sre** in Stripe Projects. Use its CLI for service provisioning and managed credentials. Status was rechecked; no hosting service or deployment was added. User-supplied Gemini and Sandbox keys remain local. The CreateOS CLI is not required or installed.
-
-```sh
-stripe projects status
-stripe projects catalog createos --json
-```
-
-These endpoints support a local single-process demo. There is no authentication, persistent queue, database, shared concurrency control, production execution. Do not expose the server publicly without appropriate access controls.
-
-## Milestones
-
-- v0.1: foundation workspace, health endpoint, typed contracts.
-- v0.2: real CreateOS commands and confirmed cleanup.
-- v0.3: bounded Gemini loop, hypotheses, evidence, deterministic policy.
-- v0.4: runtime-generated diagnostics, static validation, synthetic 502 fixture, real execution.
-- v0.5: model-generated minimal patch and fresh-sandbox 502 → 200/regression verification (current).
-- Later: deployment and demo freeze.
-
-[Progress and verification](docs/PROGRESS.md) · [Documentation checks](docs/DOC_CHECK.md)
+Validation: `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`. See [progress](docs/PROGRESS.md), [v0.5 verification](docs/V0.5.md), and [CreateOS operation](docs/CREATEOS_SMOKE.md). This Windows host uses supported Webpack builds; the frozen investigation path is unchanged by v0.6.
