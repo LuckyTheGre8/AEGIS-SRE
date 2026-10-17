@@ -80,6 +80,10 @@ Open localhost:3000, select a demo incident, load its context, then Investigate.
 
 The control plane is deployed on Railway through services attached in Stripe Projects. Configure the server credentials and `APP_ORIGIN` to match the public HTTPS origin exactly. Railway supplies `PORT`; the production command binds to `0.0.0.0`. Unrelated/cross-site origins remain blocked. Origin validation is not authentication; this single-process hackathon app has no user-authentication or durable job layer.
 
+## Pay only for verified remediation
+
+An optional Stripe flow authorizes **$5.00 USD** before investigating and captures only after independent fresh-sandbox verification **and explicit human approval**. Failed/inconclusive investigations cannot capture, and authorizations can be released. The original investigation engine is unchanged. Configure `STRIPE_SECRET_KEY` server-side and the matching `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`; matching test keys simulate payments, while matching live keys display **LIVE MODE · REAL $5** and require the human operator to perform real payment confirmation/capture. No automatic charge or production mutation. [Payment details](docs/PAYMENTS.md) · [Official test-card demo workflow](docs/DEMO.md).
+
 ## Current scope
 
 The prototype demonstrates three complete synthetic reference incidents. The architecture is designed to support additional repository/incident adapters later. It does not diagnose arbitrary production incidents today.

@@ -186,6 +186,19 @@ footer>div>span:first-child { font-size:8px; }
 .spin { animation:spin 1s linear infinite; }
 .incident-input select { display:block; width:100%; max-width:440px; margin:8px 0; padding:9px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font:inherit; font-size:12px; }
 .incident-input select:disabled { opacity:.6; }
+.remediation-payment { margin:18px 0; }
+.remediation-payment .panel-heading { flex-wrap:wrap; gap:10px; }
+.payment-content { padding:16px 18px; font-size:12px; line-height:1.7; }
+.payment-content>p { margin:7px 0; }
+.payment-content>p:first-child { color:var(--muted); max-width:850px; }
+.payment-toggle { display:flex; align-items:center; gap:8px; margin:12px 0; }
+.payment-toggle input { accent-color:var(--accent); }
+.payment-summary,.payment-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:12px; }
+.payment-summary>span,.payment-history { color:var(--accent); font:10px/1.8 var(--font-mono); overflow-wrap:anywhere; }
+.payment-live { color:#ffbf91; border-color:#98623b; }
+.payment-confirmation { max-width:540px; margin:14px 0; }
+.payment-confirmation>.button { margin-top:12px; }
+.payment-content .form-help { display:block; margin-top:12px; }
 .running-banner,.request-error,.demo-outcome { border:1px solid #3b4930; background:#171e16; border-radius:6px; padding:18px; margin:18px 0; }
 .running-banner { display:flex; align-items:center; gap:16px; color:var(--accent); }
 .running-banner>div { flex:1; min-width:0; }

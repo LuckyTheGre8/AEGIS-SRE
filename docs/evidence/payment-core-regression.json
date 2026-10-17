@@ -1,0 +1,391 @@
+{
+  "id": "fab9f4d4-94ee-43e1-aae4-c87bb2369573",
+  "fixture": "broken-proxy",
+  "state": "COMPLETED",
+  "outcome": "VERIFIED",
+  "summary": "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 502 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production.",
+  "iterations": 2,
+  "model": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Proxy configuration points to an incorrect upstream port, causing HTTP 502 bad gateway errors.",
+      "confidence": 0.95,
+      "status": "SUPPORTED",
+      "supportingEvidence": [
+        "E1",
+        "E2"
+      ],
+      "contradictingEvidence": []
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "type": "HTTP_RESPONSE",
+      "source": "CreateOS sb-01m562mtta7fd45fhnsxhkw275 · trusted fixture bootstrap",
+      "summary": "Synthetic Broken proxy / 502: HTTP 502 failure and healthy baseline HTTP 200 observed. Fixture evidence, not production evidence.",
+      "raw": "{\"stdout\":\"{\\\"fixture\\\":\\\"broken-proxy\\\",\\\"proxy\\\":{\\\"port\\\":8080,\\\"status\\\":502,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Bad Gateway\\\\\\\",\\\\\\\"upstreamError\\\\\\\":\\\\\\\"ECONNREFUSED\\\\\\\",\\\\\\\"upstreamPort\\\\\\\":3001}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":522.782}",
+      "reliable": true
+    },
+    {
+      "id": "E2",
+      "type": "GENERATED_TOOL",
+      "source": "CreateOS sb-01m562mtta7fd45fhnsxhkw275 · generated diag-broken-proxy-js · sha256:d65c2014bedb1a34e96d31d501c8bff1837628c2a1c134f4f00638ab6ea5f97b",
+      "summary": "Generated diagnostic Broken Proxy Diagnostic Tool: exit 0, 133.589 ms. Synthetic fixture only; no production or fix verification.",
+      "raw": "{\"stdout\":\"{\\\"config\\\":{\\\"proxyPort\\\":8080,\\\"backendPort\\\":3000,\\\"upstreamPort\\\":3001},\\\"proxy\\\":{\\\"port\\\":8080,\\\"status\\\":502,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Bad Gateway\\\\\\\",\\\\\\\"upstreamError\\\\\\\":\\\\\\\"ECONNREFUSED\\\\\\\",\\\\\\\"upstreamPort\\\\\\\":3001}\\\",\\\"error\\\":null},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\",\\\"error\\\":null},\\\"upstream\\\":{\\\"port\\\":3001,\\\"status\\\":null,\\\"body\\\":\\\"\\\",\\\"error\\\":\\\"ECONNREFUSED\\\"},\\\"finding\\\":\\\"Proxy configured upstream port does not match running backend port\\\"}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":133.589}",
+      "reliable": true
+    },
+    {
+      "id": "E3",
+      "type": "CONFIG_FILE",
+      "source": "CreateOS sb-01m562mtta7fd45fhnsxhkw275 · /workspace/fixture-config.json",
+      "summary": "Actual diagnosis fixture configuration read before generating a minimal patch.",
+      "raw": "{\"stdout\":\"{\\n  \\\"proxyPort\\\": 8080,\\n  \\\"backendPort\\\": 3000,\\n  \\\"upstreamPort\\\": 3001\\n}\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":5.573}",
+      "reliable": true
+    },
+    {
+      "id": "E4",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m562n44cqfz6zrx7j77gpg01 · validation RECREATE",
+      "summary": "RECREATE: exit 0, 278.573 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"fixture\\\":\\\"broken-proxy\\\",\\\"proxy\\\":{\\\"port\\\":8080,\\\"status\\\":502,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Bad Gateway\\\\\\\",\\\\\\\"upstreamError\\\\\\\":\\\\\\\"ECONNREFUSED\\\\\\\",\\\\\\\"upstreamPort\\\\\\\":3001}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":278.573}",
+      "reliable": true
+    },
+    {
+      "id": "E5",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m562n44cqfz6zrx7j77gpg01 · validation BEFORE",
+      "summary": "BEFORE: exit 0, 76.632 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":8080,\\\"status\\\":502,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Bad Gateway\\\\\\\",\\\\\\\"upstreamError\\\\\\\":\\\\\\\"ECONNREFUSED\\\\\\\",\\\\\\\"upstreamPort\\\\\\\":3001}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":false,\\\"description\\\":\\\"Backend remains healthy and proxy preserves the backend JSON response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":76.632}",
+      "reliable": true
+    },
+    {
+      "id": "E6",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m562n44cqfz6zrx7j77gpg01 · validation APPLY_RELOAD",
+      "summary": "APPLY_RELOAD: exit 0, 162.259 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"applied\\\":true,\\\"reloaded\\\":true,\\\"before\\\":{\\\"proxyPort\\\":8080,\\\"backendPort\\\":3000,\\\"upstreamPort\\\":3001},\\\"after\\\":{\\\"proxyPort\\\":8080,\\\"backendPort\\\":3000,\\\"upstreamPort\\\":3000}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":162.259}",
+      "reliable": true
+    },
+    {
+      "id": "E7",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m562n44cqfz6zrx7j77gpg01 · validation AFTER_REGRESSION",
+      "summary": "AFTER_REGRESSION: exit 0, 46.58 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":8080,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":true,\\\"description\\\":\\\"Backend remains healthy and proxy preserves the backend JSON response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":46.58}",
+      "reliable": true
+    }
+  ],
+  "events": [
+    {
+      "id": "210ee017-7ae3-4b3c-8a7e-29672a801ac6",
+      "timestamp": "2026-10-17T23:20:06.701Z",
+      "state": "RECEIVED",
+      "type": "transition",
+      "title": "Incident received",
+      "summary": "Validated incident accepted for a bounded baseline investigation."
+    },
+    {
+      "id": "a3589c09-754f-4330-bdfd-31cc6de01366",
+      "timestamp": "2026-10-17T23:20:06.702Z",
+      "state": "PLANNING",
+      "type": "transition",
+      "title": "Form initial hypotheses",
+      "summary": "Request a structured decision using only the incident and available observations."
+    },
+    {
+      "id": "9f3721e3-791c-4aed-b21d-605c2e78fe8d",
+      "timestamp": "2026-10-17T23:20:08.329Z",
+      "state": "REVIEWING_ACTION",
+      "type": "transition",
+      "title": "Review proposed action",
+      "summary": "Investigate fixture config and live endpoints via generated tool since evidence is currently empty."
+    },
+    {
+      "id": "ecfd5b3e-1fa6-4c7f-bfeb-bf12e28a733a",
+      "timestamp": "2026-10-17T23:20:08.329Z",
+      "state": "PROVISIONING_SANDBOX",
+      "type": "transition",
+      "title": "Create isolated baseline",
+      "summary": "Authenticate and create one disposable CreateOS sandbox without production credentials."
+    },
+    {
+      "id": "8ee61de4-ce62-4fc8-accf-c5fdf777a84a",
+      "timestamp": "2026-10-17T23:20:10.958Z",
+      "state": "REPRODUCING",
+      "type": "transition",
+      "title": "Start Broken proxy / 502",
+      "summary": "Start the selected reproducible service fixture and verify its actual HTTP responses."
+    },
+    {
+      "id": "e44f809c-9dba-4c1e-b1c4-be8b8677941b",
+      "timestamp": "2026-10-17T23:20:12.862Z",
+      "state": "GENERATING_TOOL",
+      "type": "transition",
+      "title": "Generate diagnostic program",
+      "summary": "Gemini writes a new diagnostic from the fixture contract and observed evidence."
+    },
+    {
+      "id": "f90c1433-dfa6-4eec-9e48-330eebe5bbbb",
+      "timestamp": "2026-10-17T23:20:14.221Z",
+      "state": "REVIEWING_TOOL",
+      "type": "transition",
+      "title": "Validate generated program",
+      "summary": "Check schema, source bytes, JavaScript syntax, dangerous operations, and deterministic policy."
+    },
+    {
+      "id": "174fc42b-9839-4143-bb00-ad57e6aaa965",
+      "timestamp": "2026-10-17T23:20:14.231Z",
+      "state": "GENERATING_TOOL",
+      "type": "transition",
+      "title": "Generate diagnostic program",
+      "summary": "Gemini writes a new diagnostic from the fixture contract and observed evidence."
+    },
+    {
+      "id": "b32e3b6e-f16e-4df7-9044-66e8abfc2eda",
+      "timestamp": "2026-10-17T23:20:15.467Z",
+      "state": "REVIEWING_TOOL",
+      "type": "transition",
+      "title": "Validate generated program",
+      "summary": "Check schema, source bytes, JavaScript syntax, dangerous operations, and deterministic policy."
+    },
+    {
+      "id": "85be0d4b-42e0-41e2-9ac3-6def88a1a107",
+      "timestamp": "2026-10-17T23:20:15.673Z",
+      "state": "EXECUTING_TOOL",
+      "type": "transition",
+      "title": "Execute generated diagnostic",
+      "summary": "Tool Broken Proxy Diagnostic Tool · READ_ONLY · CreateOS sb-01m562mtta7fd45fhnsxhkw275 · maximum 20 seconds"
+    },
+    {
+      "id": "568b17be-ad39-4fa0-abda-22fce5a86ca4",
+      "timestamp": "2026-10-17T23:20:16.004Z",
+      "state": "ANALYZING_RESULT",
+      "type": "transition",
+      "title": "Generated-tool evidence recorded",
+      "summary": "Actual generated-program output is cited with its source hash and sandbox provenance."
+    },
+    {
+      "id": "557c6ae0-0a78-49f2-ab05-886fb4624332",
+      "timestamp": "2026-10-17T23:20:16.004Z",
+      "state": "PLANNING",
+      "type": "transition",
+      "title": "Update fixture hypotheses",
+      "summary": "Use observed evidence to propose a minimal fixture patch for fresh-sandbox verification; no production access."
+    },
+    {
+      "id": "e73e3f1f-8a62-4297-8f9e-67af259cd481",
+      "timestamp": "2026-10-17T23:20:17.189Z",
+      "state": "REVIEWING_ACTION",
+      "type": "transition",
+      "title": "Review proposed action",
+      "summary": "Evidence confirms proxy upstream port mismatch. Proposing fix patch for sandbox validation."
+    },
+    {
+      "id": "a6248d9b-5e95-4972-a237-4d31aa5df70f",
+      "timestamp": "2026-10-17T23:20:17.400Z",
+      "state": "GENERATING_FIX",
+      "type": "transition",
+      "title": "Generate minimal fixture patch",
+      "summary": "Gemini selects one configuration replacement from actual diagnostic evidence; no production access."
+    },
+    {
+      "id": "b0bcbbdd-d47c-4e5a-94b5-7b860d3ab21e",
+      "timestamp": "2026-10-17T23:20:18.566Z",
+      "state": "VALIDATING_FIX",
+      "type": "transition",
+      "title": "Validate in a fresh sandbox",
+      "summary": "Recreate selected fixture, prove 502, apply generated data patch, reload, test 200 and regression, then confirm destruction."
+    },
+    {
+      "id": "b96306b5-d2c4-45be-b261-1c9df1f5aa49",
+      "timestamp": "2026-10-17T23:20:25.084Z",
+      "state": "CLEANING_UP",
+      "type": "transition",
+      "title": "Destroy sandbox",
+      "summary": "Cleanup continues even if the browser disconnects."
+    },
+    {
+      "id": "e9be4797-a578-47cd-a4ef-9d288a5c3cd2",
+      "timestamp": "2026-10-17T23:20:25.511Z",
+      "state": "COMPLETED",
+      "type": "transition",
+      "title": "Synthetic fixture fix verified",
+      "summary": "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 502 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production."
+    }
+  ],
+  "actions": [
+    {
+      "action": {
+        "action": "generate_tool",
+        "reason": "Investigate fixture config and live endpoints via generated tool since evidence is currently empty.",
+        "hypothesisId": "H1",
+        "risk": "READ_ONLY",
+        "expectedEvidence": [
+          "readConfig output",
+          "probe observations"
+        ],
+        "diagnostic": "none"
+      },
+      "decision": "ALLOW",
+      "reason": "Generate a diagnostic; execution requires separate source validation and tool policy."
+    },
+    {
+      "action": {
+        "action": "propose_fix",
+        "reason": "Evidence confirms proxy upstream port mismatch. Proposing fix patch for sandbox validation.",
+        "hypothesisId": "H1",
+        "risk": "SANDBOX_MUTATION",
+        "expectedEvidence": [
+          "Sandbox patch validation output showing proxy successfully reaching backend"
+        ],
+        "diagnostic": "none"
+      },
+      "decision": "ALLOW",
+      "reason": "Generate one constrained fixture-config patch for a fresh disposable validation sandbox; no production access."
+    }
+  ],
+  "tools": [
+    {
+      "attempt": 1,
+      "tool": {
+        "id": "diagnostic-tool-js-01",
+        "name": "Proxy Configuration and Upstream Diagnostic Tool",
+        "purpose": "Read runtime config and probe proxy, backend, and upstream targets to diagnose HTTP 502 errors.",
+        "language": "javascript",
+        "source": "const config = readConfig();\nconst p1 = await probe(\"proxy\");\nconst p2 = await probe(\"backend\");\nconst p3 = await probe(\"configuredUpstream\");\nconst result = {\n  configuration: config,\n  probes: {\n    proxy: p1,\n    backend: p2,\n    configuredUpstream: p3\n  },\n  finding: p1.status === 502 ? \"Proxy returns 502 Bad Gateway\" : \"Proxy operational\"\n};\nconsole.log(JSON.stringify(result));",
+        "entrypoint": "/workspace/diagnostic-tool.js",
+        "timeoutSeconds": 20,
+        "risk": "READ_ONLY",
+        "expectedOutput": "json"
+      },
+      "sha256": "89234f10e6164dd9f03508e72f4cc3f5f6850c2c9f7591bdc086ed5d824665dc",
+      "checks": [
+        "ZOD_VALID",
+        "SOURCE_SIZE_OK",
+        "SYNTAX_OK",
+        "DANGEROUS_OPERATIONS_BLOCKED"
+      ],
+      "decision": "DENY",
+      "reason": "Only READ_ONLY JSON diagnostics at the fixed JavaScript entrypoint may execute for at most 20 seconds.",
+      "execution": null,
+      "error": "Only READ_ONLY JSON diagnostics at the fixed JavaScript entrypoint may execute for at most 20 seconds."
+    },
+    {
+      "attempt": 2,
+      "tool": {
+        "id": "diag-broken-proxy-js",
+        "name": "Broken Proxy Diagnostic Tool",
+        "purpose": "Read runtime config and probe all three targets to diagnose proxy misconfiguration.",
+        "language": "javascript",
+        "source": "const cfg = readConfig();\nconst pRes = await probe(\"proxy\");\nconst bRes = await probe(\"backend\");\nconst uRes = await probe(\"configuredUpstream\");\nconst mismatch = cfg.upstreamPort !== cfg.backendPort;\nconst finding = mismatch ? \"Proxy configured upstream port does not match running backend port\" : \"Ports match\";\nconst result = { config: cfg, proxy: pRes, backend: bRes, upstream: uRes, finding: finding };\nconsole.log(JSON.stringify(result));",
+        "entrypoint": "/workspace/generated-tool.js",
+        "timeoutSeconds": 20,
+        "risk": "READ_ONLY",
+        "expectedOutput": "json"
+      },
+      "sha256": "d65c2014bedb1a34e96d31d501c8bff1837628c2a1c134f4f00638ab6ea5f97b",
+      "checks": [
+        "ZOD_VALID",
+        "SOURCE_SIZE_OK",
+        "SYNTAX_OK",
+        "DANGEROUS_OPERATIONS_BLOCKED"
+      ],
+      "decision": "ALLOW",
+      "reason": "Validated read-only fixture capabilities; execution restricted to a disposable CreateOS sandbox.",
+      "execution": {
+        "stdout": "{\"config\":{\"proxyPort\":8080,\"backendPort\":3000,\"upstreamPort\":3001},\"proxy\":{\"port\":8080,\"status\":502,\"body\":\"{\\\"error\\\":\\\"Bad Gateway\\\",\\\"upstreamError\\\":\\\"ECONNREFUSED\\\",\\\"upstreamPort\\\":3001}\",\"error\":null},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\",\"error\":null},\"upstream\":{\"port\":3001,\"status\":null,\"body\":\"\",\"error\":\"ECONNREFUSED\"},\"finding\":\"Proxy configured upstream port does not match running backend port\"}\n",
+        "stderr": "",
+        "exitCode": 0,
+        "durationMs": 133.589
+      }
+    }
+  ],
+  "validation": {
+    "status": "VERIFIED",
+    "diagnosisSandboxId": "sb-01m562mtta7fd45fhnsxhkw275",
+    "validationSandboxId": "sb-01m562n44cqfz6zrx7j77gpg01",
+    "proposal": {
+      "file": "/workspace/fixture-config.json",
+      "operation": "replace",
+      "path": "/upstreamPort",
+      "oldValue": 3001,
+      "value": 3000,
+      "rootCause": "Proxy configuration points to upstreamPort 3001 while the actual backend runs on port 3000, resulting in ECONNREFUSED and HTTP 502 Bad Gateway errors as observed in E1 and E2.",
+      "reason": "Updating upstreamPort from 3001 to 3000 aligns the proxy upstream target with the running backend service port verified in E3 and E2.",
+      "evidenceIds": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "risk": "SANDBOX_MUTATION"
+    },
+    "patch": {
+      "file": "/workspace/fixture-config.json",
+      "reason": "Updating upstreamPort from 3001 to 3000 aligns the proxy upstream target with the running backend service port verified in E3 and E2.",
+      "before": "{\n  \"proxyPort\": 8080,\n  \"backendPort\": 3000,\n  \"upstreamPort\": 3001\n}",
+      "after": "{\n  \"proxyPort\": 8080,\n  \"backendPort\": 3000,\n  \"upstreamPort\": 3000\n}",
+      "diff": "--- a/fixture-config.json\n+++ b/fixture-config.json\n@@ -1,5 +1,5 @@\n {\n   \"proxyPort\": 8080,\n   \"backendPort\": 3000,\n-  \"upstreamPort\": 3001\n+  \"upstreamPort\": 3000\n }\n",
+      "risk": "SANDBOX_MUTATION",
+      "validationStatus": "VERIFIED"
+    },
+    "policy": {
+      "decision": "ALLOW",
+      "reason": "One guarded upstreamPort replacement using observed port values. Fixed fixture file; disposable validation sandbox only."
+    },
+    "beforeStatus": 502,
+    "afterStatus": 200,
+    "patchApplied": true,
+    "regression": "PASS",
+    "commands": [
+      {
+        "phase": "RECREATE",
+        "command": "node /workspace/bootstrap.cjs",
+        "result": {
+          "stdout": "{\"fixture\":\"broken-proxy\",\"proxy\":{\"port\":8080,\"status\":502,\"body\":\"{\\\"error\\\":\\\"Bad Gateway\\\",\\\"upstreamError\\\":\\\"ECONNREFUSED\\\",\\\"upstreamPort\\\":3001}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 278.573
+        }
+      },
+      {
+        "phase": "BEFORE",
+        "command": "node /workspace/health-check.cjs",
+        "result": {
+          "stdout": "{\"proxy\":{\"port\":8080,\"status\":502,\"body\":\"{\\\"error\\\":\\\"Bad Gateway\\\",\\\"upstreamError\\\":\\\"ECONNREFUSED\\\",\\\"upstreamPort\\\":3001}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"regression\":{\"pass\":false,\"description\":\"Backend remains healthy and proxy preserves the backend JSON response\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 76.632
+        }
+      },
+      {
+        "phase": "APPLY_RELOAD",
+        "command": "node /workspace/apply-patch.cjs",
+        "result": {
+          "stdout": "{\"applied\":true,\"reloaded\":true,\"before\":{\"proxyPort\":8080,\"backendPort\":3000,\"upstreamPort\":3001},\"after\":{\"proxyPort\":8080,\"backendPort\":3000,\"upstreamPort\":3000}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 162.259
+        }
+      },
+      {
+        "phase": "AFTER_REGRESSION",
+        "command": "node /workspace/health-check.cjs",
+        "result": {
+          "stdout": "{\"proxy\":{\"port\":8080,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"regression\":{\"pass\":true,\"description\":\"Backend remains healthy and proxy preserves the backend JSON response\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 46.58
+        }
+      }
+    ],
+    "cleanup": "DESTROYED"
+  },
+  "cleanup": "DESTROYED",
+  "sandboxId": "sb-01m562mtta7fd45fhnsxhkw275",
+  "productionAction": "NOT_EXECUTED"
+}

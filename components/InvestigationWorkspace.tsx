@@ -12,6 +12,9 @@ import { ValidationResult } from "./ValidationResult";
 import { InvestigationClient } from "@/lib/client/investigation-client";
 import { DemoOutcome } from "./DemoOutcome";
 import { Infrastructure } from "./Infrastructure";
+import { RemediationPayment } from "./RemediationPayment";
+import { PaymentClient } from "@/lib/client/payment-client";
+import type { PaymentView } from "@/lib/payments/schemas";
 
 type Health = "checking" | "healthy" | "unavailable";
 
@@ -28,13 +31,19 @@ async function fetchApplicationHealth(signal: AbortSignal): Promise<Health> {
 export function InvestigationWorkspace() {
   const [health, setHealth] = useState<Health>("checking");
   const [event, setEvent] = useState<InvestigationEvent | null>(null);
-  const [client] = useState(() => new InvestigationClient());
+  const [payments] = useState(() => new PaymentClient());
+  const paymentView = useSyncExternalStore(payments.subscribe, payments.getSnapshot, payments.getServerSnapshot);
+  const [paymentEnabled, setPaymentEnabled] = useState(false);
+  const paymentActive = !!paymentView.payment && !["CAPTURED", "RELEASED"].includes(paymentView.payment.stage);
+  const usePayment = paymentEnabled || paymentActive;
+  const [client] = useState(() => new InvestigationClient(payments.investigationFetch));
   const view = useSyncExternalStore(client.subscribe, client.getSnapshot, client.getServerSnapshot);
   const investigation = view.result;
   const busy = view.phase !== "idle";
   const investigating = view.phase === "running" || view.phase === "recovering";
   const elapsed = `${Math.floor(view.elapsedSeconds / 60)}:${String(view.elapsedSeconds % 60).padStart(2, "0")}`;
   useEffect(() => { client.start(); return () => client.stop(); }, [client]);
+  useEffect(() => { payments.start(); return () => payments.stop(); }, [payments]);
   const [showAbout, setShowAbout] = useState(false);
   const aboutRef = useRef<HTMLDialogElement>(null);
   const healthController = useRef<AbortController | null>(null);
@@ -62,10 +71,18 @@ export function InvestigationWorkspace() {
     else aboutRef.current?.close();
   }, [showAbout]);
 
-  function prepare(input: IncidentInput) {
+  function runInvestigation(input: IncidentInput, attemptId: string | null = null) {
     if (client.getSnapshot().phase !== "idle") return;
+    payments.linkInvestigation(attemptId);
     setEvent({ id: crypto.randomUUID(), timestamp: new Date().toISOString(), state: "RECEIVED", type: "incident_prepared", title: "Incident submitted", summary: "Input validated locally. Waiting for real server observations." });
     void client.submit(input);
+  }
+  function prepare(input: IncidentInput) {
+    if (usePayment) { if (!paymentActive && !paymentView.busy) void payments.create(input); }
+    else runInvestigation(input);
+  }
+  function runAuthorized(payment: PaymentView) {
+    if (payment.stage === "AUTHORIZED" && !payment.started) runInvestigation(payment.input, payment.attemptId);
   }
   function reset(clearResult = false) {
     if (client.getSnapshot().phase !== "idle") return;
@@ -88,7 +105,8 @@ export function InvestigationWorkspace() {
 
         <section className="foundation-banner" aria-label="Build milestone"><span className="banner-icon"><Sparkles size={16} /></span><div><strong>Observe. Generate. Execute. Verify.</strong><span> AI can be wrong safely. Real evidence, a fresh validation environment, and a human approval boundary.</span></div><span className="milestone-tag">v{version}</span></section>
 
-        <section className="panel incident-panel" aria-label="Incident input"><div className="panel-heading"><h2><Radio size={16} />Incident context</h2><button className="icon-button" aria-label="Check status" title="Check backend status" onClick={() => void client.refresh()}><RefreshCw size={14} /></button><span className={`incident-state ${investigation ? "prepared" : ""}`}>{busy ? <LoaderCircle size={12} className="spin" /> : view.error ? <CircleHelp size={12} /> : investigation ? <Check size={11} /> : <span className="mini-dot muted" />}{view.phase === "checking" ? "CHECKING STATUS" : investigating ? "INVESTIGATION RUNNING" : view.error ? "NEEDS ATTENTION" : investigation?.state ?? "AWAITING INPUT"}</span></div><IncidentForm busy={busy} retry={!!view.error} busyLabel={view.phase === "checking" ? "Checking status…" : "Investigating…"} onPrepare={prepare} onReset={reset} /></section>
+        <section className="panel incident-panel" aria-label="Incident input"><div className="panel-heading"><h2><Radio size={16} />Incident context</h2><button className="icon-button" aria-label="Check status" title="Check backend status" onClick={() => void client.refresh()}><RefreshCw size={14} /></button><span className={`incident-state ${investigation ? "prepared" : ""}`}>{busy ? <LoaderCircle size={12} className="spin" /> : view.error ? <CircleHelp size={12} /> : investigation ? <Check size={11} /> : <span className="mini-dot muted" />}{view.phase === "checking" ? "CHECKING STATUS" : investigating ? "INVESTIGATION RUNNING" : view.error ? "NEEDS ATTENTION" : investigation?.state ?? "AWAITING INPUT"}</span></div><IncidentForm busy={busy || paymentView.busy || (usePayment && paymentActive)} retry={!!view.error} busyLabel={view.phase === "checking" ? "Checking status…" : busy ? "Investigating…" : "Payment pending…"} onPrepare={prepare} onReset={reset} /></section>
+        <RemediationPayment client={payments} enabled={usePayment} locked={paymentActive} investigating={busy} onEnabled={setPaymentEnabled} onInvestigate={runAuthorized} />
         {busy && <section className="running-banner" role="status" aria-live="polite" aria-busy="true">
           <LoaderCircle size={24} className="spin" /><div><strong>{view.phase === "checking" ? "Checking latest investigation status" : view.phase === "recovering" ? "Reconnecting to the investigation" : "Investigation running"}</strong><p>{view.phase === "checking" ? "Checking the backend before enabling another run." : "Gemini and CreateOS are investigating in an isolated environment."}</p>{investigating && <progress aria-label="Waiting for actual investigation output" />}{investigation && <small>Previous result {investigation.id.slice(0,8)} remains visible until this request completes.</small>}</div>{investigating && <span className="elapsed-time">{elapsed}<small>{view.reconnected ? "since reconnect" : "elapsed"}</small></span>}
         </section>}

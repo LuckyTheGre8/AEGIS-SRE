@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-17T23:19:32.548Z",
+  "mode": "live",
+  "scope": "Unconfirmed PaymentIntent creation, capture denial and cancellation only. No card confirmation, authorization, or capture attempted.",
+  "checks": [
+    {
+      "action": "create",
+      "http": 200,
+      "status": "requires_payment_method",
+      "amount": 500,
+      "currency": "usd"
+    },
+    {
+      "action": "capture_before_verified",
+      "http": 409
+    },
+    {
+      "action": "missing_approval",
+      "http": 400
+    },
+    {
+      "action": "wrong_payment_link",
+      "http": 404
+    },
+    {
+      "action": "investigate_without_authorization",
+      "http": 409
+    },
+    {
+      "action": "cancel",
+      "http": 200,
+      "status": "canceled",
+      "stage": "RELEASED"
+    }
+  ],
+  "paymentIntentId": "pi_3URgsy7FiGhg3ei816vgT6eu",
+  "attemptId": "d1a556f5-88e3-454b-99fd-352bc992a6ff",
+  "stripeObserved": {
+    "status": "canceled",
+    "livemode": true,
+    "captureMethod": "manual",
+    "amountCapturable": 0,
+    "amountReceived": 0
+  },
+  "browserPreview": {
+    "paymentIntentId": "pi_3URgrm7FiGhg3ei80IqIABMP",
+    "status": "canceled",
+    "livemode": true,
+    "amountReceived": 0,
+    "amountCapturable": 0
+  }
+}

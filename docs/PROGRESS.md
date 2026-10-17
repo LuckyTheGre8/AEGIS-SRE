@@ -1,5 +1,17 @@
 # Progress
 
+## Post-v0.6 — Pay on verified remediation
+
+Added an optional $5 USD Stripe manual authorization/capture wrapper and compact payment card. The original investigation endpoint, client coordinator, Gemini/agent, fixture registry, generated tools, policy, CreateOS adapter, patch generation, validation and cleanup code are unchanged. Payment ownership uses an HttpOnly/SameSite cookie and process memory. The server links its own completed investigation response, verifies all result/cleanup gates and Stripe metadata, and captures only after explicit approval. Failed/unverified results cannot capture and may release the authorization. Fixed amount, card-only payments, operation locks, idempotency keys, sanitized responses and mode checks are covered by focused tests.
+
+The original request specified test mode; the subsequent explicit instruction was to use the supplied live keys. Matching live keys therefore show LIVE MODE · REAL $5, while matching test keys retain simulated payment support. No raw card data is collected by application code. No keys were printed or added to Git. Railway needs STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY from the same account/mode, alongside the existing APP_ORIGIN. No deployment or Stripe Projects resource changes were performed.
+
+Real Stripe boundary acceptance: unconfirmed intent creation succeeded; capture before verification returned 409, missing approval 400, foreign payment ID 404, and an unauthorized investigation 409. Both unconfirmed intents were canceled and independently retrieved as canceled with zero capturable/received amounts. [Actual receipt](evidence/payment-boundary-live.json). No real card authorization or capture was attempted. Full Stripe AUTHORIZED → VERIFIED → CAPTURED acceptance remains pending: the supplied keys are live, and a human must confirm/capture a real payment over HTTPS, or supply test keys for simulated acceptance. Mocked success is not presented as real Stripe acceptance.
+
+A new real browser/core regression passed VERIFIED: run `fab9f4d4` (see [full result](evidence/payment-core-regression.json)), HTTP 502 → 200, regression PASS, separate diagnosis/validation sandboxes, both DESTROYED. Stripe.js rendered its live-mode form, and displayed the expected HTTPS requirement on the local HTTP preview. The preview intent was canceled before entering any payment details. Documentation includes official test-card instructions and restart/authorization-release limitations.
+
+Final required checks passed: lint, strict typecheck, **52 tests**, production build, and a source/browser-bundle scan for actual configured secret values. Local preview stopped after sandbox cleanup and confirmation of both canceled PaymentIntents. The remaining real payment authorization/capture is a manual HTTPS acceptance step, not a claimed success.
+
 ## Post-v0.6 — Reusable incident fixtures
 
 Added a browser-selectable trusted registry for the original broken proxy, missing synthetic environment configuration, and a wrong health-probe path. All use the existing bounded investigator, runtime Gemini-generated diagnostic, restricted capabilities/policy, generated data patch, and fresh-sandbox validation. The original proxy server/bootstrap/runner strings and health/applier programs are unchanged; its 502 gates remain the default. CreateOS adapter, origin/auth, production boundary, budgets and cleanup semantics are unchanged.
