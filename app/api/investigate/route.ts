@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const parsed = IncidentInputSchema.safeParse(input);
   if (!parsed.success) return NextResponse.json({ error: "Incident input failed validation; shell commands are not accepted." }, { status: 400, headers });
   if (state.running) return NextResponse.json({ error: "An investigation is already running." }, { status: 409, headers });
-  if (state.lastResult && ["FAILED", "UNCONFIRMED"].includes(state.lastResult.cleanup)) return NextResponse.json({ error: "Confirm previous sandbox cleanup before restarting the server." }, { status: 409, headers });
+  if (state.lastResult && (["FAILED", "UNCONFIRMED"].includes(state.lastResult.cleanup) || (state.lastResult.validation && ["FAILED", "UNCONFIRMED"].includes(state.lastResult.validation.cleanup)))) return NextResponse.json({ error: "Confirm previous diagnosis and validation sandbox cleanup before restarting the server." }, { status: 409, headers });
   state.running = true;
   try {
     state.lastResult = await investigate(parsed.data, llmFromEnvironment, createOSFromEnvironment);

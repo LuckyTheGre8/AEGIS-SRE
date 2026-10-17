@@ -58,6 +58,7 @@ function harness(generate: LLMProvider["generateDiagnosticTool"], failExecution 
       action:{action:context.evidence.length ? "finish":"generate_tool",risk:context.evidence.length ? "SAFE":"READ_ONLY",diagnostic:"none",reason:"Inspect synthetic runtime config",hypothesisId:"H1",expectedEvidence:[]},
     }; },
     async generateDiagnosticTool(context) { generated++; return generate(context); },
+    async generatePatch() { throw new Error("Not requested by v0.4 baseline test"); },
   };
   return {sandbox,llm,uploads,counts:()=>({destroyed,generated})};
 }

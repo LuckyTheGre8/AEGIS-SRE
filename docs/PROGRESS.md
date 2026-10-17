@@ -1,5 +1,13 @@
 # Progress
 
+## v0.5.0 — Fresh-sandbox fix verification
+
+Acceptance passed on 18 October 2026 (Asia/Calcutta). Gemini generated a minimal guarded config replacement from real v0.4-style diagnostic evidence. A new CreateOS sandbox recreated the original broken fixture, measured HTTP 502, applied the generated patch and acknowledged reload, then ran the identical health test to measure HTTP 200 and regression PASS. Both sandbox destructions were confirmed before final VERIFIED. No production mutation was added.
+
+Run `b4897eed-8072-4dde-92d1-fb1e86e98dbf`: diagnosis `sb-01m55v7v400j0hsbtgj4b6xn8t`; fresh validation `sb-01m55v84dv5yzwcvdcr4awq1mh`. Model patch changed upstreamPort 3001 → 3000 using observed backend config. Before test 119.402 ms, apply/reload 219.321 ms, after/regression 131.194 ms; exit codes 0 and empty stderr. [Actual receipt and diff](evidence/patch-validation-v0.5.json).
+
+The existing validation panel shows root cause, generated diff, BEFORE 502, AFTER 200, REGRESSION PASS, FIX STATUS VERIFIED, distinct VM IDs and cleanup. Lint, typecheck, all **29 tests**, and production build passed. Stripe Projects workflow/status was rechecked; no hosting service or deployment added. Stop at v0.5.
+
 ## v0.4.0 — Runtime-generated diagnostics
 
 Acceptance passed on 18 October 2026 (Asia/Calcutta). Gemini generated a JavaScript diagnostic at runtime. Strict schema, UTF-8 size, Acorn syntax, dangerous-operation allowlist and deterministic tool policy preceded exact-source upload and execution in a real disposable CreateOS sandbox. No model-generated source was executed on the host.

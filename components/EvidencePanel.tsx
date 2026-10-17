@@ -15,6 +15,6 @@ export function EvidencePanel({ result }: { result?: InvestigationResult | null 
       <p className="investigation-outcome">{result.outcome} · {result.summary}</p>
       {result.error && <p className="form-error" role="alert">{result.error.code}: {result.error.message}</p>}
     </div> : <div className="empty-evidence"><div className="empty-icon"><FileSearch size={23} strokeWidth={1.4} /></div><h3>Evidence before answers.</h3><p>Observed outputs and test results will build<br className="desktop-break" /> the case for each hypothesis.</p><span className="empty-label">NO EVIDENCE COLLECTED</span></div>}
-    <div className="panel-note"><ShieldCheck size={14} /><span>Confidence is a model estimate. Synthetic fixture output is not production evidence; no fix has been verified.</span></div>
+    <div className="panel-note"><ShieldCheck size={14} /><span>Confidence is a model estimate. Synthetic fixture evidence and fix verification do not authorize production changes.</span></div>
   </Panel>;
 }

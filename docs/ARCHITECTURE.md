@@ -1,6 +1,8 @@
-# Architecture — v0.4.0
+# Architecture — v0.5.0
 
-The generated-tool path is described in [v0.4 operation](V0.4.md). It adds fixture reproduction, runtime model generation, static syntax/operation validation, separate tool policy, exact-source upload, guest execution, source hashes and evidence. Patch verification remains unavailable. The retained v0.3 baseline path below is still supported.
+The current patch path is described in [v0.5 operation](V0.5.md): model-generated guarded config replacement, a separate validation sandbox, actual 502 before patch and 200 afterward, regression, and confirmed cleanup. Production execution remains unavailable.
+
+The generated-tool path is described in [v0.4 operation](V0.4.md). It adds fixture reproduction, runtime model generation, static syntax/operation validation, separate tool policy, exact-source upload, guest execution, source hashes and evidence. That diagnosis evidence now feeds the v0.5 patch path. The retained v0.3 baseline path below is still supported.
 
 ## Retained baseline path
 

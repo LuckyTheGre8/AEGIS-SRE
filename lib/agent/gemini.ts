@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { AgentDecisionSchema, AgentError, type AgentContext, type LLMProvider, type ToolGenerationContext } from "./provider";
+import { AgentDecisionSchema, AgentError, type AgentContext, type LLMProvider, type ToolGenerationContext, type PatchGenerationContext } from "./provider";
 import { GeneratedToolSchema } from "./schemas";
-import { INVESTIGATION_INSTRUCTIONS, TOOL_INSTRUCTIONS } from "./prompts";
+import { INVESTIGATION_INSTRUCTIONS, TOOL_INSTRUCTIONS, PATCH_INSTRUCTIONS } from "./prompts";
+import { GeneratedPatchSchema } from "../patch/schemas";
 
 const ResponseSchema = z.object({
   candidates: z.array(z.object({
@@ -20,6 +21,10 @@ export class GeminiLLMProvider implements LLMProvider {
 
   async generateDiagnosticTool(context: ToolGenerationContext): Promise<unknown> {
     return this.structured(TOOL_INSTRUCTIONS, context, GeneratedToolSchema);
+  }
+
+  async generatePatch(context: PatchGenerationContext): Promise<unknown> {
+    return this.structured(PATCH_INSTRUCTIONS, context, GeneratedPatchSchema);
   }
 
   private async structured(instructions: string, context: unknown, schema: z.ZodType): Promise<unknown> {

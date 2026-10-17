@@ -9,6 +9,7 @@ import { safeSandboxError } from "../sandbox/createos";
 import { SandboxProvisionError, type SandboxProvider, type SandboxSession } from "../sandbox/provider";
 import { installFixture } from "../tools/fixture";
 import { executeGeneratedDiagnostic } from "../tools/execute";
+import { generateAndValidatePatch } from "../patch/validate";
 
 export const MAX_AGENT_ITERATIONS = 3;
 export const MAX_DIAGNOSTICS = 2;
@@ -19,7 +20,7 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
   const result: InvestigationResult = {
     id: crypto.randomUUID(), state: "RECEIVED", outcome: "INCONCLUSIVE", iterations: 0,
     summary: "Synthetic fixture observations cannot confirm a production root cause. Patch verification has not run.",
-    model: null, hypotheses: [], evidence: [], events: machine.events, actions: [], tools: [], cleanup: "NOT_REQUIRED", sandboxId: null, productionAction: "NOT_EXECUTED",
+    model: null, hypotheses: [], evidence: [], events: machine.events, actions: [], tools: [], validation: null, cleanup: "NOT_REQUIRED", sandboxId: null, productionAction: "NOT_EXECUTED",
   };
   let sandbox: SandboxProvider | undefined;
   let session: SandboxSession | undefined;
@@ -54,6 +55,14 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
         machine.move("PLANNING", "Context reviewed", "No external access or command execution was requested.");
         continue;
       }
+      if (action.action === "propose_fix") {
+        if (!sandbox || !session || !fixtureInstalled) throw new AgentError("PATCH_EVIDENCE_REQUIRED", "Observe the generated diagnostic in a diagnosis sandbox before proposing a patch.");
+        await generateAndValidatePatch(incident.incident, llm, sandbox, session, sandboxFactory, result, machine);
+        result.outcome = "VERIFIED";
+        result.summary = "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 502 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production.";
+        stopped = true;
+        break;
+      }
       const diagnosticId = action.diagnostic as keyof typeof DIAGNOSTICS;
       if (action.action === "execute_diagnostic" && (executed.has(diagnosticId) || executed.size >= MAX_DIAGNOSTICS)) { result.summary = "Diagnostic budget reached. Investigation remains inconclusive."; stopped = true; break; }
       if (!session) {
@@ -75,7 +84,7 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
         }
         await executeGeneratedDiagnostic(incident.incident, llm, sandbox!, session, result, machine);
         machine.move("ANALYZING_RESULT", "Generated-tool evidence recorded", "Actual generated-program output is cited with its source hash and sandbox provenance.");
-        machine.move("PLANNING", "Update fixture hypotheses", "Use observed evidence; production diagnosis and final patch verification remain unavailable.");
+        machine.move("PLANNING", "Update fixture hypotheses", "Use observed evidence to propose a minimal fixture patch for fresh-sandbox verification; no production access.");
         continue;
       }
       const diagnostic = DIAGNOSTICS[diagnosticId];
@@ -104,9 +113,15 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
       if (machine.state === "PLANNING") machine.move("REVIEWING_ACTION", "Close investigation", "No further actions will execute; release the disposable sandbox.");
       machine.move("CLEANING_UP", "Destroy sandbox", "Cleanup continues even if the browser disconnects.");
       try { await sandbox.destroy(session); result.cleanup = "DESTROYED"; }
-      catch (error) { result.cleanup = "FAILED"; result.outcome = "FAILED"; result.error = safeSandboxError(error); }
+      catch (error) {
+        result.cleanup = "FAILED"; result.outcome = "FAILED"; result.error = safeSandboxError(error);
+        if (result.validation?.status === "VERIFIED") {
+          result.validation.status = "FAILED_VALIDATION"; result.validation.patch.validationStatus = "FAILED_VALIDATION";
+          result.validation.error = { code: "DIAGNOSIS_CLEANUP_FAILED", message: "Validation tests passed but diagnosis sandbox cleanup was not confirmed." };
+        }
+      }
     }
-    machine.move(result.outcome === "FAILED" ? "FAILED" : "COMPLETED", result.outcome === "FAILED" ? "Investigation failed" : "Baseline investigation complete", result.error?.message ?? result.summary);
+    machine.move(result.outcome === "FAILED" ? "FAILED" : "COMPLETED", result.outcome === "FAILED" ? "Investigation failed" : result.outcome === "VERIFIED" ? "Synthetic fixture fix verified" : "Investigation complete", result.error?.message ?? result.summary);
     result.state = machine.state;
   }
   return InvestigationResultSchema.parse(result);

@@ -6,7 +6,9 @@ export const FIXTURE_DESCRIPTION = `Synthetic broken-proxy: live backend and pro
 // Trusted fixture infrastructure. The diagnostic source is generated separately.
 const SERVER = String.raw`
 const http = require('node:http');
-const config = require('/workspace/fixture-config.json');
+const fs = require('node:fs');
+let config = JSON.parse(fs.readFileSync('/workspace/fixture-config.json','utf8'));
+process.on('SIGHUP',()=>{config=JSON.parse(fs.readFileSync('/workspace/fixture-config.json','utf8'));fs.writeFileSync('/workspace/reload-ack.json',JSON.stringify(config));});
 http.createServer((_req,res) => { res.writeHead(200, {'Content-Type':'application/json'}); res.end(JSON.stringify({service:'synthetic-backend',ok:true})); }).listen(config.backendPort,'127.0.0.1');
 http.createServer((_req,res) => {
  const upstream = http.get({hostname:'127.0.0.1',port:config.upstreamPort,path:'/',timeout:1500}, response => { res.writeHead(response.statusCode); response.pipe(res); });
@@ -17,7 +19,9 @@ http.createServer((_req,res) => {
 const BOOTSTRAP = String.raw`
 const {spawn} = require('node:child_process');
 const http = require('node:http');
-spawn(process.execPath,['/workspace/fixture-server.cjs'],{detached:true,stdio:'ignore',env:{}}).unref();
+const child=spawn(process.execPath,['/workspace/fixture-server.cjs'],{detached:true,stdio:'ignore',env:{}});
+require('node:fs').writeFileSync('/workspace/fixture.pid',String(child.pid));
+child.unref();
 const get = port => new Promise(resolve => { const req=http.get({hostname:'127.0.0.1',port,path:'/',timeout:1000},res=>{let body='';res.on('data',data=>body+=data);res.on('end',()=>resolve({port,status:res.statusCode,body}));}); req.on('error',()=>resolve({port,status:null}));req.on('timeout',()=>req.destroy()); });
 (async()=>{ for(let attempt=0;attempt<30;attempt++){ const proxy=await get(8080),backend=await get(3000); if(proxy.status===502 && backend.status===200){console.log(JSON.stringify({fixture:'broken-proxy',proxy,backend}));return;} await new Promise(resolve=>setTimeout(resolve,100)); } throw new Error('Fixture failed to start'); })().catch(error=>{console.error(error.message);process.exitCode=1;});
 `;
@@ -43,7 +47,7 @@ export async function installFixture(provider: SandboxProvider, session: Sandbox
   const mkdir = await provider.execute(session, "mkdir", ["-p", "/workspace"], { timeoutMs: 20_000 });
   if (mkdir.exitCode !== 0) throw new AgentError("FIXTURE_SETUP", "Could not create the fixture directory.");
   for (const [path, source] of Object.entries({
-    "/workspace/fixture-config.json": JSON.stringify({ proxyPort: 8080, backendPort: 3000, upstreamPort: 3001 }),
+    "/workspace/fixture-config.json": JSON.stringify({ proxyPort: 8080, backendPort: 3000, upstreamPort: 3001 }, null, 2),
     "/workspace/fixture-server.cjs": SERVER,
     "/workspace/bootstrap.cjs": BOOTSTRAP,
     "/workspace/tool-runner.cjs": RUNNER,

@@ -1,5 +1,9 @@
 # Documentation and environment check
 
+## v0.5 update — 18 October 2026
+
+Read the installed Next.js route-handler guide before extending result/recovery handling. Gemini uses the existing verified structured-output API for the new strict generatePatch contract. CreateOS uses the existing official adapter and a new create call for validation; the real receipt confirms distinct sandbox IDs and both destructions. No new dependency or API assumption was introduced. Stripe Projects guidance/status was rechecked; no services provisioned. See [v0.5 acceptance](V0.5.md).
+
 ## v0.4 update — 18 October 2026
 
 Read the installed Next.js route-handler guide, Acorn's official parser documentation, and Node's vm documentation. Acorn is now an explicit production dependency. Static parsing does not execute code; vm is explicitly not treated as a security boundary. CreateOS provides isolation. Gemini structured output and CreateOS lifecycle retain their previously verified APIs; the real generated-tool run succeeded without an API discrepancy. Stripe Projects guidance/status was rechecked; no additional provider service was provisioned. See [v0.4 acceptance](V0.4.md).

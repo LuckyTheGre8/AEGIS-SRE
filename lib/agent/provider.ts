@@ -26,6 +26,14 @@ export interface LLMProvider {
   /** Output is untrusted until the orchestrator validates it. */
   nextAction(context: AgentContext): Promise<unknown>;
   generateDiagnosticTool(context: ToolGenerationContext): Promise<unknown>;
+  generatePatch(context: PatchGenerationContext): Promise<unknown>;
+}
+
+export interface PatchGenerationContext {
+  incident: string;
+  hypotheses: Hypothesis[];
+  evidence: Evidence[];
+  observedConfig: { proxyPort: number; backendPort: number; upstreamPort: number };
 }
 
 export interface ToolGenerationContext {

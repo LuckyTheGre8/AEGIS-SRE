@@ -26,7 +26,7 @@ function sandboxHarness() {
   };
   return { provider, counts: () => ({ created, executed, destroyed }) };
 }
-function llm(nextAction: LLMProvider["nextAction"]): LLMProvider { return { name: "synthetic-test-provider", model: "test-model", nextAction, async generateDiagnosticTool() { throw new Error("Unused in baseline test"); } }; }
+function llm(nextAction: LLMProvider["nextAction"]): LLMProvider { return { name: "synthetic-test-provider", model: "test-model", nextAction, async generateDiagnosticTool() { throw new Error("Unused in baseline test"); }, async generatePatch() { throw new Error("Unused in baseline test"); } }; }
 
 test("bounded golden path validates a decision, executes policy-approved diagnostic, records evidence, and cleans up", async () => {
   const box = sandboxHarness();

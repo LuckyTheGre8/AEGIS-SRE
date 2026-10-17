@@ -36,7 +36,8 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
   const output = investigation ? [
     `INVESTIGATION ${investigation.id}`,
     `MODEL ${investigation.model?.provider ?? "unconfigured"} / ${investigation.model?.model ?? "—"}`,
-    `SANDBOX ${investigation.sandboxId ?? "not created"} · STATUS ${investigation.cleanup}`,
+    `DIAGNOSIS SANDBOX ${investigation.sandboxId ?? "not created"} · STATUS ${investigation.cleanup}`,
+    ...(investigation.validation ? [`VALIDATION SANDBOX ${investigation.validation.validationSandboxId ?? "not created"} · STATUS ${investigation.validation.cleanup}`, `FIX ${investigation.validation.status} · BEFORE ${investigation.validation.beforeStatus ?? "—"} · AFTER ${investigation.validation.afterStatus ?? "—"} · REGRESSION ${investigation.validation.regression}`] : []),
     ...investigation.tools.map((entry) => `TOOL ${entry.tool?.name ?? "rejected output"} · ${entry.tool?.risk ?? "unclassified"} · POLICY ${entry.decision}\nPURPOSE ${entry.tool?.purpose ?? entry.error}\nCHECKS ${entry.checks.join(", ")}`),
     ...investigation.evidence.map((evidence) => `\n${evidence.id} · ${evidence.source}\n${evidence.raw ?? evidence.summary}`),
     `\nCLEANUP ${investigation.cleanup}`,
