@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AgentActionSchema, CommandResultSchema, EvidenceSchema, GeneratedToolSchema, HypothesisSchema, InvestigationEventSchema, InvestigationStateSchema } from "../agent/schemas";
+import { FIXTURE_IDS } from "../fixtures/catalog";
 import { PatchValidationSchema } from "../patch/schemas";
 
 export const ToolAttemptSchema = z.object({
@@ -11,6 +12,7 @@ export type ToolAttempt = z.infer<typeof ToolAttemptSchema>;
 
 export const InvestigationResultSchema = z.object({
   id: z.string(),
+  fixture: z.enum(FIXTURE_IDS).default("broken-proxy"),
   state: InvestigationStateSchema,
   outcome: z.enum(["INCONCLUSIVE", "FAILED", "VERIFIED"]),
   summary: z.string(),

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FIXTURE_IDS } from "../fixtures/catalog";
 import { INVESTIGATION_STATES } from "../investigation/states";
 
 export const RiskSchema = z.enum([
@@ -11,7 +12,7 @@ export const InvestigationStateSchema = z.enum(INVESTIGATION_STATES);
 export const IncidentInputSchema = z.strictObject({
   incident: z.string().trim().min(10, "Describe the incident in at least 10 characters.")
     .max(4000, "Keep the incident under 4,000 characters."),
-  fixture: z.literal("broken-proxy"),
+  fixture: z.enum(FIXTURE_IDS),
 });
 
 export const AgentActionSchema = z.strictObject({

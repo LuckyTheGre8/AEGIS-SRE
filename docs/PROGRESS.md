@@ -1,5 +1,19 @@
 # Progress
 
+## Post-v0.6 — Reusable incident fixtures
+
+Added a browser-selectable trusted registry for the original broken proxy, missing synthetic environment configuration, and a wrong health-probe path. All use the existing bounded investigator, runtime Gemini-generated diagnostic, restricted capabilities/policy, generated data patch, and fresh-sandbox validation. The original proxy server/bootstrap/runner strings and health/applier programs are unchanged; its 502 gates remain the default. CreateOS adapter, origin/auth, production boundary, budgets and cleanup semantics are unchanged.
+
+Real Gemini → generated diagnostic → CreateOS → generated patch → fresh validation acceptance on 18 October 2026:
+
+- Broken proxy: **502 → 200 · regression PASS · VERIFIED**, run `3579871a-0796-4214-ae3b-b908e16cd505`. [Receipt](evidence/broken-proxy-fixtures-acceptance.json).
+- Missing environment: **500 → 200 · regression PASS · VERIFIED**, run `6791a010-8ae8-40ed-a81d-fc611361ff08`. Gemini populated only synthetic AEGIS_DEMO_GREETING configuration. [Receipt](evidence/missing-environment-acceptance.json).
+- Broken health check: **404 → 200 · regression PASS · VERIFIED**, run `fd0d71c9-5860-4fe5-90b8-7081a1e19022`. Gemini changed /healthz → /ready. [Receipt](evidence/broken-health-check-acceptance.json).
+
+Every run used different diagnosis/validation IDs and confirmed both sandboxes DESTROYED; production remained NOT_EXECUTED. Browser checks confirmed all three selections update context, controls disable during execution, the original proxy completes, and actual result titles remain bound to their fixture. No browser warnings/errors were observed.
+
+Required checks passed: lint, strict typecheck, **41 tests**, production build. Essential new tests cover registry/selection, config/patch capability boundaries, fixture-specific failure classes, wrong before/after results, regression/cleanup failure, and sandbox reuse. Source and browser bundles passed a credential-value scan. No new environment variables or services are required. No deployment was performed. Local acceptance server stopped after cleanup. Stop after Goal 1; optional invoicing was not started.
+
 ## v0.6.0 — Demo freeze and submission polish
 
 The investigation orchestrator, Gemini provider/prompts, CreateOS adapter, generated-tool execution, deterministic policy, patch generation, fresh-sandbox validation and cleanup implementations are unchanged from v0.5 plus the deployed origin fix.

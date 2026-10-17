@@ -7,6 +7,7 @@ import { InvestigationMachine } from "../investigation/machine";
 import { InvestigationResultSchema, type InvestigationResult } from "../investigation/result";
 import { safeSandboxError } from "../sandbox/createos";
 import { SandboxProvisionError, type SandboxProvider, type SandboxSession } from "../sandbox/provider";
+import { fixtureDefinition } from "../fixtures/registry";
 import { installFixture } from "../tools/fixture";
 import { executeGeneratedDiagnostic } from "../tools/execute";
 import { generateAndValidatePatch } from "../patch/validate";
@@ -16,9 +17,10 @@ export const MAX_DIAGNOSTICS = 2;
 
 export async function investigate(input: IncidentInput, llmFactory: () => LLMProvider, sandboxFactory: () => SandboxProvider): Promise<InvestigationResult> {
   const incident = IncidentInputSchema.parse(input);
+  const fixture = fixtureDefinition(incident.fixture);
   const machine = new InvestigationMachine();
   const result: InvestigationResult = {
-    id: crypto.randomUUID(), state: "RECEIVED", outcome: "INCONCLUSIVE", iterations: 0,
+    id: crypto.randomUUID(), fixture: fixture.id, state: "RECEIVED", outcome: "INCONCLUSIVE", iterations: 0,
     summary: "Synthetic fixture observations cannot confirm a production root cause. Patch verification has not run.",
     model: null, hypotheses: [], evidence: [], events: machine.events, actions: [], tools: [], validation: null, cleanup: "NOT_REQUIRED", sandboxId: null, productionAction: "NOT_EXECUTED",
   };
@@ -34,7 +36,7 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
     for (let iteration = 0; iteration < MAX_AGENT_ITERATIONS; iteration++) {
       result.iterations++;
       const decision = AgentDecisionSchema.parse(await llm.nextAction({
-        incident: incident.incident, iteration: iteration + 1, hypotheses: result.hypotheses,
+        incident: incident.incident, fixture: fixture.diagnosticContract, iteration: iteration + 1, hypotheses: result.hypotheses,
         evidence: result.evidence, availableDiagnostics: Object.keys(DIAGNOSTICS),
       }));
       const ids = new Set(decision.hypotheses.map((hypothesis) => hypothesis.id));
@@ -57,9 +59,9 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
       }
       if (action.action === "propose_fix") {
         if (!sandbox || !session || !fixtureInstalled) throw new AgentError("PATCH_EVIDENCE_REQUIRED", "Observe the generated diagnostic in a diagnosis sandbox before proposing a patch.");
-        await generateAndValidatePatch(incident.incident, llm, sandbox, session, sandboxFactory, result, machine);
+        await generateAndValidatePatch(incident.incident, llm, sandbox, session, sandboxFactory, result, machine, fixture);
         result.outcome = "VERIFIED";
-        result.summary = "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 502 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production.";
+        result.summary = `Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP ${fixture.expectedFailureStatus} → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production.`;
         stopped = true;
         break;
       }
@@ -77,12 +79,12 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
         if (!fixtureInstalled) {
           // A baseline command may already have created the sandbox in a previous turn.
           if (machine.state === "REVIEWING_ACTION") machine.move("PROVISIONING_SANDBOX", "Reuse disposable sandbox", "Prepare the synthetic fixture in this investigation's existing VM.");
-          machine.move("REPRODUCING", "Start synthetic HTTP 502 fixture", "Start a real loopback backend and broken proxy, then verify their actual HTTP responses.");
-          const baseline = await installFixture(sandbox!, session);
-          result.evidence.push(EvidenceSchema.parse({ id: `E${result.evidence.length + 1}`, type: "HTTP_RESPONSE", reliable: true, source: `CreateOS ${session.id} · trusted fixture bootstrap`, summary: "Synthetic proxy HTTP 502 and backend HTTP 200 observed. This is fixture evidence, not production evidence.", raw: JSON.stringify(baseline) }));
+          machine.move("REPRODUCING", `Start ${fixture.title}`, "Start the selected reproducible service fixture and verify its actual HTTP responses.");
+          const baseline = await installFixture(sandbox!, session, fixture);
+          result.evidence.push(EvidenceSchema.parse({ id: `E${result.evidence.length + 1}`, type: "HTTP_RESPONSE", reliable: true, source: `CreateOS ${session.id} · trusted fixture bootstrap`, summary: `Synthetic ${fixture.title}: HTTP ${fixture.expectedFailureStatus} failure and healthy baseline HTTP 200 observed. Fixture evidence, not production evidence.`, raw: JSON.stringify(baseline) }));
           fixtureInstalled = true;
         }
-        await executeGeneratedDiagnostic(incident.incident, llm, sandbox!, session, result, machine);
+        await executeGeneratedDiagnostic(incident.incident, llm, sandbox!, session, result, machine, fixture);
         machine.move("ANALYZING_RESULT", "Generated-tool evidence recorded", "Actual generated-program output is cited with its source hash and sandbox provenance.");
         machine.move("PLANNING", "Update fixture hypotheses", "Use observed evidence to propose a minimal fixture patch for fresh-sandbox verification; no production access.");
         continue;

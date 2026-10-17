@@ -1,4 +1,5 @@
 import { LockKeyhole, ShieldCheck, CircleAlert } from "lucide-react";
+import { fixtureMetadata } from "@/lib/fixtures/catalog";
 import type { InvestigationResult } from "@/lib/investigation/result";
 
 export function DemoOutcome({ result, previous = false }: { result: InvestigationResult; previous?: boolean }) {
@@ -6,7 +7,7 @@ export function DemoOutcome({ result, previous = false }: { result: Investigatio
   const hypothesis = result.hypotheses.find(item => item.status === "SUPPORTED" || item.status === "CONFIRMED") ?? result.hypotheses[0];
   return <section className={`demo-outcome ${result.outcome.toLowerCase()}`} aria-label="Reference incident result">
     <div className="outcome-heading"><span className="eyebrow">{previous ? "PREVIOUS RESULT" : result.outcome === "FAILED" ? "LATEST ATTEMPT" : "REFERENCE INCIDENT"} · {result.id.slice(0,8)}</span><strong>{result.outcome === "VERIFIED" ? <ShieldCheck size={16} /> : <CircleAlert size={16} />}{result.outcome}</strong></div>
-    <h2>Production API is returning HTTP 502 errors.</h2>
+    <h2>{fixtureMetadata(result.fixture).title}</h2><p>{fixtureMetadata(result.fixture).incidentText}</p>
     {hypothesis && <p><span className="result-label">HYPOTHESIS</span>{hypothesis.statement} <span className="confidence-label">{Math.round(hypothesis.confidence * 100)}% confidence estimate · {hypothesis.status}</span></p>}
     {validation && <>
       <div className="result-metrics" aria-label="Measured validation results">

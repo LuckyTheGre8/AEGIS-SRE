@@ -36,7 +36,7 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
   const [copyError, setCopyError] = useState("");
   if (investigation) return <GeneratedDiagnostics result={investigation} />;
   const output = formatOutput(result);
-  const source = "# No diagnostic program has been generated yet.\n# Use Investigate to run the HTTP 502 reference incident.";
+  const source = "# No diagnostic program has been generated yet.\n# Use Investigate to run the selected reference incident.";
 
   async function runSmokeTest() {
     setRunning(true);

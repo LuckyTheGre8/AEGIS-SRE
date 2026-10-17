@@ -5,22 +5,22 @@ import { AgentError, type LLMProvider } from "../agent/provider";
 import type { InvestigationResult, ToolAttempt } from "../investigation/result";
 import type { InvestigationMachine } from "../investigation/machine";
 import type { SandboxProvider, SandboxSession } from "../sandbox/provider";
-import { FIXTURE_DESCRIPTION } from "./fixture";
+import { fixtureDefinition } from "../fixtures/registry";
 import { evaluateToolPolicy, MAX_COMMAND_SECONDS, MAX_GENERATED_TOOLS, MAX_TOOL_RETRIES, validateToolSource } from "./validation";
 
-export async function executeGeneratedDiagnostic(incident: string, llm: LLMProvider, sandbox: SandboxProvider, session: SandboxSession, result: InvestigationResult, machine: InvestigationMachine) {
+export async function executeGeneratedDiagnostic(incident: string, llm: LLMProvider, sandbox: SandboxProvider, session: SandboxSession, result: InvestigationResult, machine: InvestigationMachine, fixture = fixtureDefinition()) {
   let previousFailure: string | undefined;
   for (let retry = 0; retry <= MAX_TOOL_RETRIES && result.tools.length < MAX_GENERATED_TOOLS; retry++) {
     machine.move("GENERATING_TOOL", "Generate diagnostic program", "Gemini writes a new diagnostic from the fixture contract and observed evidence.");
     const record: ToolAttempt = { attempt: result.tools.length + 1, tool: null, sha256: null, checks: [], decision: "DENY", reason: "Source has not passed validation and policy.", execution: null };
     result.tools.push(record);
     try {
-      const output = await llm.generateDiagnosticTool({ incident, hypotheses: result.hypotheses, evidence: result.evidence, fixture: FIXTURE_DESCRIPTION, attempt: record.attempt, ...(previousFailure ? { previousFailure } : {}) });
+      const output = await llm.generateDiagnosticTool({ incident, hypotheses: result.hypotheses, evidence: result.evidence, fixture: fixture.diagnosticContract, probeTargets: fixture.probeTargets, attempt: record.attempt, ...(previousFailure ? { previousFailure } : {}) });
       machine.move("REVIEWING_TOOL", "Validate generated program", "Check schema, source bytes, JavaScript syntax, dangerous operations, and deterministic policy.");
       const tool = GeneratedToolSchema.parse(output);
       record.tool = tool;
       record.sha256 = createHash("sha256").update(tool.source).digest("hex");
-      record.checks = validateToolSource(tool).checks;
+      record.checks = validateToolSource(tool, fixture.probeTargets).checks;
       const policy = evaluateToolPolicy(tool);
       record.decision = policy.decision === "ALLOW" ? "ALLOW" : "DENY";
       record.reason = policy.reason;

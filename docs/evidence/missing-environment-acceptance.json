@@ -1,0 +1,350 @@
+{
+  "id": "6791a010-8ae8-40ed-a81d-fc611361ff08",
+  "fixture": "missing-environment",
+  "state": "COMPLETED",
+  "outcome": "VERIFIED",
+  "summary": "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 500 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production.",
+  "iterations": 2,
+  "model": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The service fails to populate the required process environment variable from environmentValue during startup, causing HTTP 500 on root requests.",
+      "confidence": 0.9,
+      "status": "SUPPORTED",
+      "supportingEvidence": [
+        "E1",
+        "E2"
+      ],
+      "contradictingEvidence": []
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "type": "HTTP_RESPONSE",
+      "source": "CreateOS sb-01m560seb1hykgxjx9j4nzyk2d · trusted fixture bootstrap",
+      "summary": "Synthetic Missing environment variable / 500: HTTP 500 failure and healthy baseline HTTP 200 observed. Fixture evidence, not production evidence.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":3000,\\\"status\\\":500,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Missing required environment variable\\\\\\\",\\\\\\\"variable\\\\\\\":\\\\\\\"AEGIS_DEMO_GREETING\\\\\\\"}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":false,\\\"description\\\":\\\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":263.115}",
+      "reliable": true
+    },
+    {
+      "id": "E2",
+      "type": "GENERATED_TOOL",
+      "source": "CreateOS sb-01m560seb1hykgxjx9j4nzyk2d · generated diag-env-var-01 · sha256:f2bf11d30554db95b1ea13b3d707325158a538019ff77d99a4fbc83ad7c1ad35",
+      "summary": "Generated diagnostic Diagnostic Tool for Environment Variable Issue: exit 0, 83.033 ms. Synthetic fixture only; no production or fix verification.",
+      "raw": "{\"stdout\":\"{\\\"config\\\":{\\\"servicePort\\\":3000,\\\"requiredVariable\\\":\\\"AEGIS_DEMO_GREETING\\\",\\\"environmentValue\\\":\\\"\\\",\\\"expectedValue\\\":\\\"hello-aegis\\\"},\\\"request\\\":{\\\"port\\\":3000,\\\"status\\\":500,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Missing required environment variable\\\\\\\",\\\\\\\"variable\\\\\\\":\\\\\\\"AEGIS_DEMO_GREETING\\\\\\\"}\\\",\\\"error\\\":null},\\\"health\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\",\\\"error\\\":null},\\\"metadata\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"requiredVariable\\\\\\\":\\\\\\\"AEGIS_DEMO_GREETING\\\\\\\",\\\\\\\"present\\\\\\\":false}\\\",\\\"error\\\":null},\\\"finding\\\":\\\"Service request endpoint returns 500 error matching hypothesis.\\\"}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":83.033}",
+      "reliable": true
+    },
+    {
+      "id": "E3",
+      "type": "CONFIG_FILE",
+      "source": "CreateOS sb-01m560seb1hykgxjx9j4nzyk2d · /workspace/fixture-config.json",
+      "summary": "Actual diagnosis fixture configuration read before generating a minimal patch.",
+      "raw": "{\"stdout\":\"{\\n  \\\"servicePort\\\": 3000,\\n  \\\"requiredVariable\\\": \\\"AEGIS_DEMO_GREETING\\\",\\n  \\\"environmentValue\\\": \\\"\\\",\\n  \\\"expectedValue\\\": \\\"hello-aegis\\\"\\n}\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":8.131}",
+      "reliable": true
+    },
+    {
+      "id": "E4",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m560sqe2x3ccecvfv7b6axyz · validation RECREATE",
+      "summary": "RECREATE: exit 0, 376.71 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":3000,\\\"status\\\":500,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Missing required environment variable\\\\\\\",\\\\\\\"variable\\\\\\\":\\\\\\\"AEGIS_DEMO_GREETING\\\\\\\"}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":false,\\\"description\\\":\\\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":376.71}",
+      "reliable": true
+    },
+    {
+      "id": "E5",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m560sqe2x3ccecvfv7b6axyz · validation BEFORE",
+      "summary": "BEFORE: exit 0, 79.822 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":3000,\\\"status\\\":500,\\\"body\\\":\\\"{\\\\\\\"error\\\\\\\":\\\\\\\"Missing required environment variable\\\\\\\",\\\\\\\"variable\\\\\\\":\\\\\\\"AEGIS_DEMO_GREETING\\\\\\\"}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":false,\\\"description\\\":\\\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":79.822}",
+      "reliable": true
+    },
+    {
+      "id": "E6",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m560sqe2x3ccecvfv7b6axyz · validation APPLY_RELOAD",
+      "summary": "APPLY_RELOAD: exit 0, 162.106 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"applied\\\":true,\\\"reloaded\\\":true,\\\"before\\\":{\\\"servicePort\\\":3000,\\\"requiredVariable\\\":\\\"AEGIS_DEMO_GREETING\\\",\\\"environmentValue\\\":\\\"\\\",\\\"expectedValue\\\":\\\"hello-aegis\\\"},\\\"after\\\":{\\\"servicePort\\\":3000,\\\"requiredVariable\\\":\\\"AEGIS_DEMO_GREETING\\\",\\\"environmentValue\\\":\\\"hello-aegis\\\",\\\"expectedValue\\\":\\\"hello-aegis\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":162.106}",
+      "reliable": true
+    },
+    {
+      "id": "E7",
+      "type": "TEST_RESULT",
+      "source": "CreateOS sb-01m560sqe2x3ccecvfv7b6axyz · validation AFTER_REGRESSION",
+      "summary": "AFTER_REGRESSION: exit 0, 69.788 ms. Fresh synthetic validation sandbox.",
+      "raw": "{\"stdout\":\"{\\\"proxy\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"backend\\\":{\\\"port\\\":3000,\\\"status\\\":200,\\\"body\\\":\\\"{\\\\\\\"service\\\\\\\":\\\\\\\"synthetic-backend\\\\\\\",\\\\\\\"ok\\\\\\\":true}\\\"},\\\"regression\\\":{\\\"pass\\\":true,\\\"description\\\":\\\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\\\"}}\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":69.788}",
+      "reliable": true
+    }
+  ],
+  "events": [
+    {
+      "id": "06e31d73-b19d-4aa6-87cf-e6380ca46fff",
+      "timestamp": "2026-10-17T22:47:39.200Z",
+      "state": "RECEIVED",
+      "type": "transition",
+      "title": "Incident received",
+      "summary": "Validated incident accepted for a bounded baseline investigation."
+    },
+    {
+      "id": "ed91d198-54a3-41de-b1bd-f1aae3ec4757",
+      "timestamp": "2026-10-17T22:47:39.202Z",
+      "state": "PLANNING",
+      "type": "transition",
+      "title": "Form initial hypotheses",
+      "summary": "Request a structured decision using only the incident and available observations."
+    },
+    {
+      "id": "9f7154d3-2e2a-48f4-b520-e0b6d2b3f1e8",
+      "timestamp": "2026-10-17T22:47:41.100Z",
+      "state": "REVIEWING_ACTION",
+      "type": "transition",
+      "title": "Review proposed action",
+      "summary": "Investigate fixture configuration, environment variables, and live endpoint observations to verify environment variable population."
+    },
+    {
+      "id": "055e590a-2bf4-49cc-b03a-25af09c6f7ea",
+      "timestamp": "2026-10-17T22:47:41.100Z",
+      "state": "PROVISIONING_SANDBOX",
+      "type": "transition",
+      "title": "Create isolated baseline",
+      "summary": "Authenticate and create one disposable CreateOS sandbox without production credentials."
+    },
+    {
+      "id": "8f34d670-8b4e-4fb3-9ec5-8888c74986be",
+      "timestamp": "2026-10-17T22:47:43.772Z",
+      "state": "REPRODUCING",
+      "type": "transition",
+      "title": "Start Missing environment variable / 500",
+      "summary": "Start the selected reproducible service fixture and verify its actual HTTP responses."
+    },
+    {
+      "id": "3f2e3ad7-f7e9-4910-a256-9dd991f19e00",
+      "timestamp": "2026-10-17T22:47:45.888Z",
+      "state": "GENERATING_TOOL",
+      "type": "transition",
+      "title": "Generate diagnostic program",
+      "summary": "Gemini writes a new diagnostic from the fixture contract and observed evidence."
+    },
+    {
+      "id": "4c2d6535-0651-4ef3-b451-acc007b733c0",
+      "timestamp": "2026-10-17T22:47:47.727Z",
+      "state": "REVIEWING_TOOL",
+      "type": "transition",
+      "title": "Validate generated program",
+      "summary": "Check schema, source bytes, JavaScript syntax, dangerous operations, and deterministic policy."
+    },
+    {
+      "id": "c0ca7a1c-648d-49ff-9abd-be587c65cf94",
+      "timestamp": "2026-10-17T22:47:48.084Z",
+      "state": "EXECUTING_TOOL",
+      "type": "transition",
+      "title": "Execute generated diagnostic",
+      "summary": "Tool Diagnostic Tool for Environment Variable Issue · READ_ONLY · CreateOS sb-01m560seb1hykgxjx9j4nzyk2d · maximum 20 seconds"
+    },
+    {
+      "id": "3a55bdc1-7c81-4a8e-a171-bcb56dd9b06d",
+      "timestamp": "2026-10-17T22:47:48.485Z",
+      "state": "ANALYZING_RESULT",
+      "type": "transition",
+      "title": "Generated-tool evidence recorded",
+      "summary": "Actual generated-program output is cited with its source hash and sandbox provenance."
+    },
+    {
+      "id": "1520ffae-ef6a-43ef-af51-900b2c9bf84b",
+      "timestamp": "2026-10-17T22:47:48.485Z",
+      "state": "PLANNING",
+      "type": "transition",
+      "title": "Update fixture hypotheses",
+      "summary": "Use observed evidence to propose a minimal fixture patch for fresh-sandbox verification; no production access."
+    },
+    {
+      "id": "9148cc22-78a5-42ad-bb7c-198536fbe1bb",
+      "timestamp": "2026-10-17T22:47:49.703Z",
+      "state": "REVIEWING_ACTION",
+      "type": "transition",
+      "title": "Review proposed action",
+      "summary": "Evidence confirms environmentValue is empty and the required variable AEGIS_DEMO_GREETING is missing; propose fix to populate it."
+    },
+    {
+      "id": "8c089042-d6cd-4371-b628-3ef3a2108dec",
+      "timestamp": "2026-10-17T22:47:49.958Z",
+      "state": "GENERATING_FIX",
+      "type": "transition",
+      "title": "Generate minimal fixture patch",
+      "summary": "Gemini selects one configuration replacement from actual diagnostic evidence; no production access."
+    },
+    {
+      "id": "871102a1-005d-4b51-9ef7-19febcf82f7f",
+      "timestamp": "2026-10-17T22:47:51.133Z",
+      "state": "VALIDATING_FIX",
+      "type": "transition",
+      "title": "Validate in a fresh sandbox",
+      "summary": "Recreate selected fixture, prove 500, apply generated data patch, reload, test 200 and regression, then confirm destruction."
+    },
+    {
+      "id": "80f0c231-6082-4ff4-b2f2-fb5afa48acbb",
+      "timestamp": "2026-10-17T22:47:58.002Z",
+      "state": "CLEANING_UP",
+      "type": "transition",
+      "title": "Destroy sandbox",
+      "summary": "Cleanup continues even if the browser disconnects."
+    },
+    {
+      "id": "66a63a3e-afc0-4d38-8bab-afc0726b0d8b",
+      "timestamp": "2026-10-17T22:47:58.810Z",
+      "state": "COMPLETED",
+      "type": "transition",
+      "title": "Synthetic fixture fix verified",
+      "summary": "Synthetic fixture fix verified in a fresh CreateOS sandbox: HTTP 500 → 200, regression PASS, validation cleanup confirmed. Production action NOT EXECUTED; human approval required for production."
+    }
+  ],
+  "actions": [
+    {
+      "action": {
+        "action": "generate_tool",
+        "reason": "Investigate fixture configuration, environment variables, and live endpoint observations to verify environment variable population.",
+        "hypothesisId": "H1",
+        "risk": "READ_ONLY",
+        "expectedEvidence": [
+          "Config parameters: servicePort, requiredVariable, environmentValue, expectedValue",
+          "Live endpoint observations from probe('request'), probe('health'), probe('metadata')"
+        ],
+        "diagnostic": "none"
+      },
+      "decision": "ALLOW",
+      "reason": "Generate a diagnostic; execution requires separate source validation and tool policy."
+    },
+    {
+      "action": {
+        "action": "propose_fix",
+        "reason": "Evidence confirms environmentValue is empty and the required variable AEGIS_DEMO_GREETING is missing; propose fix to populate it.",
+        "hypothesisId": "H1",
+        "risk": "SANDBOX_MUTATION",
+        "expectedEvidence": [
+          "Fresh sandbox validation passing regression tests."
+        ],
+        "diagnostic": "none"
+      },
+      "decision": "ALLOW",
+      "reason": "Generate one constrained fixture-config patch for a fresh disposable validation sandbox; no production access."
+    }
+  ],
+  "tools": [
+    {
+      "attempt": 1,
+      "tool": {
+        "id": "diag-env-var-01",
+        "name": "Diagnostic Tool for Environment Variable Issue",
+        "purpose": "Diagnoses whether the required environment variable is present and probes request, health, and metadata endpoints.",
+        "language": "javascript",
+        "source": "const cfg = readConfig();\nconst r1 = await probe('request');\nconst r2 = await probe('health');\nconst r3 = await probe('metadata');\nconst result = {\n  config: cfg,\n  request: r1,\n  health: r2,\n  metadata: r3,\n  finding: r1.status === 500 ? 'Service request endpoint returns 500 error matching hypothesis.' : 'Service request endpoint did not return 500.'\n};\nconsole.log(JSON.stringify(result));",
+        "entrypoint": "/workspace/generated-tool.js",
+        "timeoutSeconds": 20,
+        "risk": "READ_ONLY",
+        "expectedOutput": "json"
+      },
+      "sha256": "f2bf11d30554db95b1ea13b3d707325158a538019ff77d99a4fbc83ad7c1ad35",
+      "checks": [
+        "ZOD_VALID",
+        "SOURCE_SIZE_OK",
+        "SYNTAX_OK",
+        "DANGEROUS_OPERATIONS_BLOCKED"
+      ],
+      "decision": "ALLOW",
+      "reason": "Validated read-only fixture capabilities; execution restricted to a disposable CreateOS sandbox.",
+      "execution": {
+        "stdout": "{\"config\":{\"servicePort\":3000,\"requiredVariable\":\"AEGIS_DEMO_GREETING\",\"environmentValue\":\"\",\"expectedValue\":\"hello-aegis\"},\"request\":{\"port\":3000,\"status\":500,\"body\":\"{\\\"error\\\":\\\"Missing required environment variable\\\",\\\"variable\\\":\\\"AEGIS_DEMO_GREETING\\\"}\",\"error\":null},\"health\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\",\"error\":null},\"metadata\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"requiredVariable\\\":\\\"AEGIS_DEMO_GREETING\\\",\\\"present\\\":false}\",\"error\":null},\"finding\":\"Service request endpoint returns 500 error matching hypothesis.\"}\n",
+        "stderr": "",
+        "exitCode": 0,
+        "durationMs": 83.033
+      }
+    }
+  ],
+  "validation": {
+    "status": "VERIFIED",
+    "diagnosisSandboxId": "sb-01m560seb1hykgxjx9j4nzyk2d",
+    "validationSandboxId": "sb-01m560sqe2x3ccecvfv7b6axyz",
+    "proposal": {
+      "file": "/workspace/fixture-config.json",
+      "operation": "replace",
+      "path": "/environmentValue",
+      "oldValue": "",
+      "value": "hello-aegis",
+      "rootCause": "The service returns HTTP 500 because the required environment variable AEGIS_DEMO_GREETING is missing or empty in the fixture configuration, as confirmed by E1 and E2.",
+      "reason": "Populate the required environmentValue in /workspace/fixture-config.json with the expected value 'hello-aegis' to satisfy the environment check (E2, E3).",
+      "evidenceIds": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "risk": "SANDBOX_MUTATION"
+    },
+    "patch": {
+      "file": "/workspace/fixture-config.json",
+      "reason": "Populate the required environmentValue in /workspace/fixture-config.json with the expected value 'hello-aegis' to satisfy the environment check (E2, E3).",
+      "before": "{\n  \"servicePort\": 3000,\n  \"requiredVariable\": \"AEGIS_DEMO_GREETING\",\n  \"environmentValue\": \"\",\n  \"expectedValue\": \"hello-aegis\"\n}",
+      "after": "{\n  \"servicePort\": 3000,\n  \"requiredVariable\": \"AEGIS_DEMO_GREETING\",\n  \"environmentValue\": \"hello-aegis\",\n  \"expectedValue\": \"hello-aegis\"\n}",
+      "diff": "--- a/fixture-config.json\n+++ b/fixture-config.json\n@@ -1,6 +1,6 @@\n {\n   \"servicePort\": 3000,\n   \"requiredVariable\": \"AEGIS_DEMO_GREETING\",\n-  \"environmentValue\": \"\",\n+  \"environmentValue\": \"hello-aegis\",\n   \"expectedValue\": \"hello-aegis\"\n }\n",
+      "risk": "SANDBOX_MUTATION",
+      "validationStatus": "VERIFIED"
+    },
+    "policy": {
+      "decision": "ALLOW",
+      "reason": "One guarded environmentValue replacement; no other configuration changes. Fixed fixture file; disposable validation sandbox only."
+    },
+    "beforeStatus": 500,
+    "afterStatus": 200,
+    "patchApplied": true,
+    "regression": "PASS",
+    "commands": [
+      {
+        "phase": "RECREATE",
+        "command": "node /workspace/bootstrap.cjs",
+        "result": {
+          "stdout": "{\"proxy\":{\"port\":3000,\"status\":500,\"body\":\"{\\\"error\\\":\\\"Missing required environment variable\\\",\\\"variable\\\":\\\"AEGIS_DEMO_GREETING\\\"}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"regression\":{\"pass\":false,\"description\":\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 376.71
+        }
+      },
+      {
+        "phase": "BEFORE",
+        "command": "node /workspace/health-check.cjs",
+        "result": {
+          "stdout": "{\"proxy\":{\"port\":3000,\"status\":500,\"body\":\"{\\\"error\\\":\\\"Missing required environment variable\\\",\\\"variable\\\":\\\"AEGIS_DEMO_GREETING\\\"}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"regression\":{\"pass\":false,\"description\":\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 79.822
+        }
+      },
+      {
+        "phase": "APPLY_RELOAD",
+        "command": "node /workspace/apply-patch.cjs",
+        "result": {
+          "stdout": "{\"applied\":true,\"reloaded\":true,\"before\":{\"servicePort\":3000,\"requiredVariable\":\"AEGIS_DEMO_GREETING\",\"environmentValue\":\"\",\"expectedValue\":\"hello-aegis\"},\"after\":{\"servicePort\":3000,\"requiredVariable\":\"AEGIS_DEMO_GREETING\",\"environmentValue\":\"hello-aegis\",\"expectedValue\":\"hello-aegis\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 162.106
+        }
+      },
+      {
+        "phase": "AFTER_REGRESSION",
+        "command": "node /workspace/health-check.cjs",
+        "result": {
+          "stdout": "{\"proxy\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"backend\":{\"port\":3000,\"status\":200,\"body\":\"{\\\"service\\\":\\\"synthetic-backend\\\",\\\"ok\\\":true}\"},\"regression\":{\"pass\":true,\"description\":\"Healthy application endpoint is unchanged and the repaired request returns its healthy response\"}}\n",
+          "stderr": "",
+          "exitCode": 0,
+          "durationMs": 69.788
+        }
+      }
+    ],
+    "cleanup": "DESTROYED"
+  },
+  "cleanup": "DESTROYED",
+  "sandboxId": "sb-01m560seb1hykgxjx9j4nzyk2d",
+  "productionAction": "NOT_EXECUTED"
+}

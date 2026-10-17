@@ -6,9 +6,18 @@ export const FixtureConfigSchema = z.strictObject({
   backendPort: z.number().int().min(1).max(65535),
   upstreamPort: z.number().int().min(1).max(65535),
 });
+export const EnvironmentConfigSchema = z.strictObject({
+  servicePort: z.literal(3000), requiredVariable: z.literal("AEGIS_DEMO_GREETING"),
+  environmentValue: z.string().max(128), expectedValue: z.literal("hello-aegis"),
+});
+export const HealthConfigSchema = z.strictObject({
+  servicePort: z.literal(3000), healthPath: z.string().regex(/^\/[a-zA-Z0-9/-]{0,64}$/), applicationPath: z.literal("/ready"),
+});
+export const AnyFixtureConfigSchema = z.union([FixtureConfigSchema, EnvironmentConfigSchema, HealthConfigSchema]);
+export type FixtureConfig = z.infer<typeof AnyFixtureConfigSchema>;
 
 // A single data change, never executable model output or an arbitrary file path.
-export const GeneratedPatchSchema = z.strictObject({
+export const ProxyPatchSchema = z.strictObject({
   file: z.literal("/workspace/fixture-config.json"),
   operation: z.literal("replace"),
   path: z.literal("/upstreamPort"),
@@ -19,6 +28,13 @@ export const GeneratedPatchSchema = z.strictObject({
   evidenceIds: z.array(z.string().min(1)).min(1).max(10),
   risk: z.literal("SANDBOX_MUTATION"),
 });
+export const EnvironmentPatchSchema = ProxyPatchSchema.extend({
+  path: z.literal("/environmentValue"), oldValue: z.string().max(128), value: z.string().min(1).max(128),
+});
+export const HealthPatchSchema = ProxyPatchSchema.extend({
+  path: z.literal("/healthPath"), oldValue: z.string().regex(/^\/[a-zA-Z0-9/-]{0,64}$/), value: z.string().regex(/^\/[a-zA-Z0-9/-]{0,64}$/),
+});
+export const GeneratedPatchSchema = z.discriminatedUnion("path", [ProxyPatchSchema, EnvironmentPatchSchema, HealthPatchSchema]);
 export type GeneratedPatch = z.infer<typeof GeneratedPatchSchema>;
 
 export const HealthObservationSchema = z.object({

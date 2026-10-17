@@ -18,6 +18,7 @@ export interface AgentContext {
   hypotheses: Hypothesis[];
   evidence: Evidence[];
   availableDiagnostics: readonly string[];
+  fixture?: string;
 }
 
 export interface LLMProvider {
@@ -33,7 +34,9 @@ export interface PatchGenerationContext {
   incident: string;
   hypotheses: Hypothesis[];
   evidence: Evidence[];
-  observedConfig: { proxyPort: number; backendPort: number; upstreamPort: number };
+  observedConfig: import("../patch/schemas").FixtureConfig;
+  fixture?: import("../fixtures/catalog").FixtureId;
+  patchConstraints?: { path: string; description: string };
 }
 
 export interface ToolGenerationContext {
@@ -41,6 +44,7 @@ export interface ToolGenerationContext {
   hypotheses: Hypothesis[];
   evidence: Evidence[];
   fixture: string;
+  probeTargets?: readonly string[];
   attempt: number;
   previousFailure?: string;
 }

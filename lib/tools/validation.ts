@@ -15,7 +15,7 @@ const allowed = new Set(["Program", "VariableDeclaration", "VariableDeclarator",
 const forbidden = new Set(["constructor", "prototype", "__proto__", "__defineGetter__", "__lookupGetter__", "process", "require", "global", "globalThis", "eval", "Function", "import", "fetch", "WebAssembly", "setTimeout", "setInterval"]);
 const fail = (message: string): never => { throw new AgentError("TOOL_REJECTED", message); };
 
-export function validateToolSource(input: unknown): { tool: GeneratedTool; checks: string[] } {
+export function validateToolSource(input: unknown, probeTargets: readonly string[] = ["proxy", "backend", "configuredUpstream"]): { tool: GeneratedTool; checks: string[] } {
   const tool = GeneratedToolSchema.parse(input);
   if (Buffer.byteLength(tool.source, "utf8") > MAX_SOURCE_BYTES) fail("Generated source exceeds 16000 UTF-8 bytes.");
   if (tool.language !== "javascript") fail("Only the restricted JavaScript diagnostic format is supported.");
@@ -45,7 +45,7 @@ export function validateToolSource(input: unknown): { tool: GeneratedTool; check
       const args = node.arguments as Ast[];
       if (node.optional) fail("Optional calls are unavailable.");
       if (callee.type === "Identifier" && callee.name === "readConfig" && args.length === 0) calls.readConfig++;
-      else if (callee.type === "Identifier" && callee.name === "probe" && args.length === 1 && args[0].type === "Literal" && ["proxy", "backend", "configuredUpstream"].includes(String(args[0].value))) {
+      else if (callee.type === "Identifier" && callee.name === "probe" && args.length === 1 && args[0].type === "Literal" && probeTargets.includes(String(args[0].value))) {
         if (probes.has(String(args[0].value))) fail("Each fixture endpoint may be probed only once.");
         probes.add(String(args[0].value)); calls.probe++;
       } else if (callee.type === "MemberExpression" && (callee.object as Ast).type === "Identifier" && !callee.computed) {

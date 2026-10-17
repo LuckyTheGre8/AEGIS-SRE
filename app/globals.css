@@ -184,6 +184,8 @@ footer>div>span:first-child { font-size:8px; }
 .about-dialog .button { margin-top:12px; }
 .about-status { display:flex; align-items:center; gap:9px; padding:13px 0; color:#c6dba9; font-size:11px; }
 .spin { animation:spin 1s linear infinite; }
+.incident-input select { display:block; width:100%; max-width:440px; margin:8px 0; padding:9px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font:inherit; font-size:12px; }
+.incident-input select:disabled { opacity:.6; }
 .running-banner,.request-error,.demo-outcome { border:1px solid #3b4930; background:#171e16; border-radius:6px; padding:18px; margin:18px 0; }
 .running-banner { display:flex; align-items:center; gap:16px; color:var(--accent); }
 .running-banner>div { flex:1; min-width:0; }
