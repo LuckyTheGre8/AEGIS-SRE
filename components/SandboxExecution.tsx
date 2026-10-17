@@ -36,12 +36,13 @@ export function SandboxExecution({ investigation, investigating = false }: { inv
   const output = investigation ? [
     `INVESTIGATION ${investigation.id}`,
     `MODEL ${investigation.model?.provider ?? "unconfigured"} / ${investigation.model?.model ?? "—"}`,
-    `SANDBOX ${investigation.sandboxId ?? "not created"}`,
+    `SANDBOX ${investigation.sandboxId ?? "not created"} · STATUS ${investigation.cleanup}`,
+    ...investigation.tools.map((entry) => `TOOL ${entry.tool?.name ?? "rejected output"} · ${entry.tool?.risk ?? "unclassified"} · POLICY ${entry.decision}\nPURPOSE ${entry.tool?.purpose ?? entry.error}\nCHECKS ${entry.checks.join(", ")}`),
     ...investigation.evidence.map((evidence) => `\n${evidence.id} · ${evidence.source}\n${evidence.raw ?? evidence.summary}`),
     `\nCLEANUP ${investigation.cleanup}`,
     `OUTCOME ${investigation.outcome} · production NOT EXECUTED`,
   ].join("\n") : formatOutput(result);
-  const source = "# No diagnostic tool generated.\n# v0.3 uses only fixed read-only diagnostics.\n# Model-generated programs are a later milestone.";
+  const source = investigation?.tools.length ? investigation.tools.map((entry) => entry.tool ? `// ${entry.tool.name}\n// Purpose: ${entry.tool.purpose}\n// Risk: ${entry.tool.risk} · Policy: ${entry.decision}\n// ${entry.reason}\n// Checks: ${entry.checks.join(", ")}\n// SHA256: ${entry.sha256}\n${entry.tool.source}` : "# Rejected model output did not pass the tool schema.").join("\n\n") : "# No diagnostic tool generated yet.\n# Investigate the synthetic HTTP 502 fixture to generate one at runtime.";
 
   async function runSmokeTest() {
     setRunning(true);

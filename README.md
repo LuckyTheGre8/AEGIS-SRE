@@ -1,6 +1,6 @@
 # Aegis SRE
 
-**v0.3.0 — Bounded Gemini investigation.** Gemini proposes typed hypotheses and actions; deterministic policy permits fixed read-only diagnostics in a real disposable CreateOS sandbox. The workspace displays confidence estimates, actual evidence, concise rationales, and confirmed cleanup.
+**v0.4.0 — Runtime-generated diagnostics.** Gemini writes a diagnostic program at runtime. Aegis validates its schema, source size, syntax and operations, applies deterministic policy, and uploads the exact source into a real disposable CreateOS sandbox. The workspace displays generated source, purpose, risk, policy, actual output, evidence, hypotheses, and confirmed cleanup.
 
 ## Local setup
 
@@ -28,9 +28,9 @@ npm start
 3. Inspect hypotheses, confidence estimates, deterministic policy decisions, actual command evidence, and cleanup.
 4. Use **Refresh investigation result** after a disconnect, or **Reset incident** to clear the browser view.
 
-The budget is three model turns, two distinct fixed diagnostics, and one disposable sandbox. Results remain in server memory until restart. This version observes a clean VM baseline; it does not reproduce the reported production incident. Successful runs end **INCONCLUSIVE**, with production action **NOT_EXECUTED**. See [v0.3 operation and real acceptance](docs/V0.3.md).
+The budget is three model turns, three generated tools total, two tool retries, 20 seconds per command, and one disposable sandbox. Results remain in server memory until restart. The reproducible synthetic fixture runs a real broken proxy (HTTP 502) and healthy backend (HTTP 200), with mismatched upstream configuration. Successful runs remain **INCONCLUSIVE** for production, with production action **NOT_EXECUTED**. See [v0.4 operation and real acceptance](docs/V0.4.md).
 
-`POST /api/investigate` accepts only the validated incident/fixture schema. `GET` returns in-process status and the latest result. No arbitrary command or generated-code endpoint exists. Gemini is the only LLM implementation; no provider selection infrastructure was added.
+`POST /api/investigate` accepts only the validated incident/fixture schema. `GET` returns in-process status and the latest result. The browser cannot submit arbitrary commands or source; generated tools come from the server-side model and pass validation before execution. Gemini is the only LLM implementation; no provider selection infrastructure was added.
 
 ## Run the CreateOS smoke test
 
@@ -44,9 +44,9 @@ npm run smoke:createos
 
 ## Architecture and boundaries
 
-Next.js App Router, strict TypeScript, React, Tailwind, Zod, Lucide, and official CreateOS Sandbox SDK `0.8.2`. LLMProvider has one Gemini REST implementation. The server validates model decisions and evidence links, applies deterministic policy, executes only server-owned command/argument pairs, and destroys the sandbox in `finally`. Model thought parts are discarded; rationales are limited to 240 characters. Keys never reach browser props or model context.
+Next.js App Router, strict TypeScript, React, Tailwind, Zod, Lucide, and official CreateOS Sandbox SDK `0.8.2`. LLMProvider has one Gemini REST implementation. The server validates model decisions and evidence links, applies deterministic policy, executes validated generated JavaScript through a fixed capability runner in CreateOS, and destroys the sandbox in `finally`. Generated code is never executed on the host. Model thought parts are discarded; rationales are limited to 240 characters. Keys never reach browser props or model context.
 
-Policy denies destructive/network actions, generated tools, and patches. Production mutations return REQUIRE_APPROVAL without execution. Confidence is a model estimate; fresh-VM output is explicitly baseline evidence. See [architecture](docs/ARCHITECTURE.md).
+Policy denies destructive/external-network actions and patches. Generated diagnostics must be READ_ONLY and use only fixed fixture capabilities. Production mutations return REQUIRE_APPROVAL without execution. Confidence is a model estimate; fixture observations are explicitly synthetic evidence. See [architecture](docs/ARCHITECTURE.md).
 
 This repository remains initialized as **Aegis-sre** in Stripe Projects. Use its CLI for service provisioning and managed credentials. Status was rechecked; no hosting service or deployment was added. User-supplied Gemini and Sandbox keys remain local. The CreateOS CLI is not required or installed.
 
@@ -55,13 +55,14 @@ stripe projects status
 stripe projects catalog createos --json
 ```
 
-These endpoints support a local single-process demo. There is no authentication, persistent queue, database, shared concurrency control, generated diagnostic tool execution, patch validation, or production execution. Do not expose the server publicly without appropriate access controls.
+These endpoints support a local single-process demo. There is no authentication, persistent queue, database, shared concurrency control, patch validation or production execution. Do not expose the server publicly without appropriate access controls.
 
 ## Milestones
 
 - v0.1: foundation workspace, health endpoint, typed contracts.
 - v0.2: real CreateOS commands and confirmed cleanup.
-- v0.3: bounded Gemini loop, hypotheses, evidence, deterministic policy (current).
-- Later: generated tools, incident reproduction, patch validation, deployment.
+- v0.3: bounded Gemini loop, hypotheses, evidence, deterministic policy.
+- v0.4: runtime-generated diagnostics, static validation, synthetic 502 fixture, real execution (current).
+- Later: final patch verification and deployment.
 
 [Progress and verification](docs/PROGRESS.md) · [Documentation checks](docs/DOC_CHECK.md)

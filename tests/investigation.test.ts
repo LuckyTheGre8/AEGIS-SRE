@@ -26,7 +26,7 @@ function sandboxHarness() {
   };
   return { provider, counts: () => ({ created, executed, destroyed }) };
 }
-function llm(nextAction: LLMProvider["nextAction"]): LLMProvider { return { name: "synthetic-test-provider", model: "test-model", nextAction }; }
+function llm(nextAction: LLMProvider["nextAction"]): LLMProvider { return { name: "synthetic-test-provider", model: "test-model", nextAction, async generateDiagnosticTool() { throw new Error("Unused in baseline test"); } }; }
 
 test("bounded golden path validates a decision, executes policy-approved diagnostic, records evidence, and cleans up", async () => {
   const box = sandboxHarness();
@@ -47,7 +47,7 @@ test("bounded golden path validates a decision, executes policy-approved diagnos
 test("policy denies unsupported execution and requires approval without allowing production mutation", () => {
   const base: AgentAction = { action: "execute_diagnostic", reason: "Check baseline", risk: "READ_ONLY", diagnostic: "runtime", expectedEvidence: [] };
   assert.equal(evaluatePolicy(base).decision, "ALLOW");
-  for (const change of [{ risk: "DESTRUCTIVE" }, { risk: "EXTERNAL_NETWORK" }, { risk: "SAFE" }, { action: "generate_tool" }, { action: "propose_fix" }, { diagnostic: "none" }]) {
+  for (const change of [{ risk: "DESTRUCTIVE" }, { risk: "EXTERNAL_NETWORK" }, { risk: "SAFE" }, { action: "propose_fix" }, { diagnostic: "none" }]) {
     assert.equal(evaluatePolicy({ ...base, ...change } as AgentAction).decision, "DENY");
   }
   assert.equal(evaluatePolicy({ ...base, risk: "PRODUCTION_MUTATION" }).decision, "REQUIRE_APPROVAL");

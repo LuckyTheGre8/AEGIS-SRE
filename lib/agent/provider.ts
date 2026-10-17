@@ -25,6 +25,16 @@ export interface LLMProvider {
   readonly model: string;
   /** Output is untrusted until the orchestrator validates it. */
   nextAction(context: AgentContext): Promise<unknown>;
+  generateDiagnosticTool(context: ToolGenerationContext): Promise<unknown>;
+}
+
+export interface ToolGenerationContext {
+  incident: string;
+  hypotheses: Hypothesis[];
+  evidence: Evidence[];
+  fixture: string;
+  attempt: number;
+  previousFailure?: string;
 }
 
 export class AgentError extends Error {

@@ -52,7 +52,7 @@ export const InvestigationEventSchema = z.strictObject({
 });
 
 export const GeneratedToolSchema = z.strictObject({
-  id: z.string().min(1),
+  id: z.string().min(1).max(64),
   name: z.string().min(1).max(120),
   purpose: z.string().min(1).max(2000),
   language: z.enum(["python", "javascript"]),

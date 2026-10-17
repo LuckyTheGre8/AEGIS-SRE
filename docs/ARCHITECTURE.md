@@ -1,4 +1,8 @@
-# Architecture — v0.3.0
+# Architecture — v0.4.0
+
+The generated-tool path is described in [v0.4 operation](V0.4.md). It adds fixture reproduction, runtime model generation, static syntax/operation validation, separate tool policy, exact-source upload, guest execution, source hashes and evidence. Patch verification remains unavailable. The retained v0.3 baseline path below is still supported.
+
+## Retained baseline path
 
 The existing React workspace submits a validated incident to `POST /api/investigate`. The Node orchestrator calls LLMProvider; Gemini is its only implementation. Every decision passes strict Zod validation, evidence-reference checks, and deterministic policy before execution.
 

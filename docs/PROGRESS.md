@@ -1,5 +1,13 @@
 # Progress
 
+## v0.4.0 — Runtime-generated diagnostics
+
+Acceptance passed on 18 October 2026 (Asia/Calcutta). Gemini generated a JavaScript diagnostic at runtime. Strict schema, UTF-8 size, Acorn syntax, dangerous-operation allowlist and deterministic tool policy preceded exact-source upload and execution in a real disposable CreateOS sandbox. No model-generated source was executed on the host.
+
+The real fixture demonstrated proxy HTTP 502, backend HTTP 200, and ECONNREFUSED on the misconfigured upstream port 3001. The generated program read actual config and probes, derived a port mismatch, exited 0 with empty stderr in 126.578 ms, and became source-linked evidence. First tool succeeded without retry; sandbox destruction confirmed. [Actual source/output receipt](evidence/generated-diagnostic-v0.4.json).
+
+Existing panels display generated source/purpose/risk/checks/policy, sandbox status, actual execution fields, and resulting evidence/hypotheses. Hard limits: three generated tools, two retries, 20 seconds per command, one sandbox. Lint, typecheck, all **25 tests**, and production build passed. Stripe Projects status was checked with the repository skill; no service or deployment added. Final patch verification remains unimplemented. Stop at v0.4.
+
 ## v0.3.0 — Bounded Gemini investigation
 
 Acceptance passed on 18 October 2026 (Asia/Calcutta). Implemented LLMProvider with Gemini only, strict Hypothesis/Evidence/AgentAction decisions, bounded transitions, deterministic policy, and existing-panel displays for hypotheses, confidence, provenance, command output, and concise action rationales. No generated tools, patches, production actions, or unrelated refactor were added.

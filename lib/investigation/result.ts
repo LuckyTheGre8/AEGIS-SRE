@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { AgentActionSchema, EvidenceSchema, HypothesisSchema, InvestigationEventSchema, InvestigationStateSchema } from "../agent/schemas";
+import { AgentActionSchema, CommandResultSchema, EvidenceSchema, GeneratedToolSchema, HypothesisSchema, InvestigationEventSchema, InvestigationStateSchema } from "../agent/schemas";
+
+export const ToolAttemptSchema = z.object({
+  attempt: z.number().int(), tool: GeneratedToolSchema.nullable(), sha256: z.string().nullable(),
+  checks: z.array(z.string()), decision: z.enum(["ALLOW", "DENY"]), reason: z.string(),
+  execution: CommandResultSchema.nullable(), error: z.string().optional(),
+});
+export type ToolAttempt = z.infer<typeof ToolAttemptSchema>;
 
 export const InvestigationResultSchema = z.object({
   id: z.string(),
@@ -12,6 +19,7 @@ export const InvestigationResultSchema = z.object({
   evidence: z.array(EvidenceSchema),
   events: z.array(InvestigationEventSchema),
   actions: z.array(z.object({ action: AgentActionSchema, decision: z.enum(["ALLOW", "DENY", "REQUIRE_APPROVAL"]), reason: z.string() })),
+  tools: z.array(ToolAttemptSchema).default([]),
   cleanup: z.enum(["NOT_REQUIRED", "DESTROYED", "FAILED", "UNCONFIRMED"]),
   sandboxId: z.string().nullable(),
   productionAction: z.literal("NOT_EXECUTED"),

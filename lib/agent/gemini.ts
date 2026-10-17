@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { AgentDecisionSchema, AgentError, type AgentContext, type LLMProvider } from "./provider";
-import { INVESTIGATION_INSTRUCTIONS } from "./prompts";
+import { AgentDecisionSchema, AgentError, type AgentContext, type LLMProvider, type ToolGenerationContext } from "./provider";
+import { GeneratedToolSchema } from "./schemas";
+import { INVESTIGATION_INSTRUCTIONS, TOOL_INSTRUCTIONS } from "./prompts";
 
 const ResponseSchema = z.object({
   candidates: z.array(z.object({
@@ -14,6 +15,14 @@ export class GeminiLLMProvider implements LLMProvider {
   constructor(private readonly apiKey: string, readonly model: string, private readonly fetcher: typeof fetch = fetch) {}
 
   async nextAction(context: AgentContext): Promise<unknown> {
+    return this.structured(INVESTIGATION_INSTRUCTIONS, context, AgentDecisionSchema);
+  }
+
+  async generateDiagnosticTool(context: ToolGenerationContext): Promise<unknown> {
+    return this.structured(TOOL_INSTRUCTIONS, context, GeneratedToolSchema);
+  }
+
+  private async structured(instructions: string, context: unknown, schema: z.ZodType): Promise<unknown> {
     let response: Response;
     try {
       response = await this.fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:generateContent`, {
@@ -21,12 +30,12 @@ export class GeminiLLMProvider implements LLMProvider {
         headers: { "x-goog-api-key": this.apiKey, "Content-Type": "application/json" },
         signal: AbortSignal.timeout(25_000),
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: INVESTIGATION_INSTRUCTIONS }] },
+          systemInstruction: { parts: [{ text: instructions }] },
           contents: [{ role: "user", parts: [{ text: JSON.stringify(context) }] }],
           generationConfig: {
-            maxOutputTokens: 2000,
+            maxOutputTokens: 4000,
             thinkingConfig: { includeThoughts: false },
-            responseFormat: { text: { mimeType: "APPLICATION_JSON", schema: z.toJSONSchema(AgentDecisionSchema) } },
+            responseFormat: { text: { mimeType: "APPLICATION_JSON", schema: z.toJSONSchema(schema) } },
           },
         }),
       });

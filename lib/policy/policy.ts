@@ -10,7 +10,8 @@ export interface PolicyDecision { decision: "ALLOW" | "DENY" | "REQUIRE_APPROVAL
 export function evaluatePolicy(action: AgentAction): PolicyDecision {
   if (action.risk === "PRODUCTION_MUTATION") return { decision: "REQUIRE_APPROVAL", reason: "Production mutation requires human approval and is disabled in this build." };
   if (action.risk === "DESTRUCTIVE" || action.risk === "EXTERNAL_NETWORK") return { decision: "DENY", reason: "Destructive and external-network actions are blocked." };
-  if (action.action === "generate_tool" || action.action === "propose_fix") return { decision: "DENY", reason: "Generated tools and patches are outside v0.3." };
+  if (action.action === "propose_fix") return { decision: "DENY", reason: "Patches and final validation are outside v0.4." };
+  if (action.action === "generate_tool" && action.risk === "READ_ONLY") return { decision: "ALLOW", reason: "Generate a diagnostic; execution requires separate source validation and tool policy." };
   if (action.action === "execute_diagnostic") {
     if (action.risk !== "READ_ONLY" || !action.diagnostic || !(action.diagnostic in DIAGNOSTICS)) {
       return { decision: "DENY", reason: "Only catalog diagnostics classified READ_ONLY may execute." };

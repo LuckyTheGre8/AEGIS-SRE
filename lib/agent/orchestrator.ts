@@ -7,6 +7,8 @@ import { InvestigationMachine } from "../investigation/machine";
 import { InvestigationResultSchema, type InvestigationResult } from "../investigation/result";
 import { safeSandboxError } from "../sandbox/createos";
 import { SandboxProvisionError, type SandboxProvider, type SandboxSession } from "../sandbox/provider";
+import { installFixture } from "../tools/fixture";
+import { executeGeneratedDiagnostic } from "../tools/execute";
 
 export const MAX_AGENT_ITERATIONS = 3;
 export const MAX_DIAGNOSTICS = 2;
@@ -16,13 +18,14 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
   const machine = new InvestigationMachine();
   const result: InvestigationResult = {
     id: crypto.randomUUID(), state: "RECEIVED", outcome: "INCONCLUSIVE", iterations: 0,
-    summary: "Baseline observations cannot confirm a production root cause. Reproduction and generated tools are later milestones.",
-    model: null, hypotheses: [], evidence: [], events: machine.events, actions: [], cleanup: "NOT_REQUIRED", sandboxId: null, productionAction: "NOT_EXECUTED",
+    summary: "Synthetic fixture observations cannot confirm a production root cause. Patch verification has not run.",
+    model: null, hypotheses: [], evidence: [], events: machine.events, actions: [], tools: [], cleanup: "NOT_REQUIRED", sandboxId: null, productionAction: "NOT_EXECUTED",
   };
   let sandbox: SandboxProvider | undefined;
   let session: SandboxSession | undefined;
   const executed = new Set<string>();
   let stopped = false;
+  let fixtureInstalled = false;
   try {
     const llm = llmFactory();
     result.model = { provider: llm.name, model: llm.model };
@@ -52,7 +55,7 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
         continue;
       }
       const diagnosticId = action.diagnostic as keyof typeof DIAGNOSTICS;
-      if (executed.has(diagnosticId) || executed.size >= MAX_DIAGNOSTICS) { result.summary = "Diagnostic budget reached. Investigation remains inconclusive."; stopped = true; break; }
+      if (action.action === "execute_diagnostic" && (executed.has(diagnosticId) || executed.size >= MAX_DIAGNOSTICS)) { result.summary = "Diagnostic budget reached. Investigation remains inconclusive."; stopped = true; break; }
       if (!session) {
         machine.move("PROVISIONING_SANDBOX", "Create isolated baseline", "Authenticate and create one disposable CreateOS sandbox without production credentials.");
         sandbox = sandboxFactory();
@@ -60,6 +63,20 @@ export async function investigate(input: IncidentInput, llmFactory: () => LLMPro
         session = await sandbox.create({ name: `aegis-inv-${crypto.randomUUID().replaceAll("-", "").slice(0, 10)}`, ...(process.env.CREATEOS_SANDBOX_SHAPE?.trim() ? { shape: process.env.CREATEOS_SANDBOX_SHAPE.trim() } : {}) });
         result.sandboxId = session.id;
         result.cleanup = "UNCONFIRMED";
+      }
+      if (action.action === "generate_tool") {
+        if (!fixtureInstalled) {
+          // A baseline command may already have created the sandbox in a previous turn.
+          if (machine.state === "REVIEWING_ACTION") machine.move("PROVISIONING_SANDBOX", "Reuse disposable sandbox", "Prepare the synthetic fixture in this investigation's existing VM.");
+          machine.move("REPRODUCING", "Start synthetic HTTP 502 fixture", "Start a real loopback backend and broken proxy, then verify their actual HTTP responses.");
+          const baseline = await installFixture(sandbox!, session);
+          result.evidence.push(EvidenceSchema.parse({ id: `E${result.evidence.length + 1}`, type: "HTTP_RESPONSE", reliable: true, source: `CreateOS ${session.id} · trusted fixture bootstrap`, summary: "Synthetic proxy HTTP 502 and backend HTTP 200 observed. This is fixture evidence, not production evidence.", raw: JSON.stringify(baseline) }));
+          fixtureInstalled = true;
+        }
+        await executeGeneratedDiagnostic(incident.incident, llm, sandbox!, session, result, machine);
+        machine.move("ANALYZING_RESULT", "Generated-tool evidence recorded", "Actual generated-program output is cited with its source hash and sandbox provenance.");
+        machine.move("PLANNING", "Update fixture hypotheses", "Use observed evidence; production diagnosis and final patch verification remain unavailable.");
+        continue;
       }
       const diagnostic = DIAGNOSTICS[diagnosticId];
       machine.move("EXECUTING_DIAGNOSTIC", "Execute approved diagnostic", `${diagnostic.command} ${diagnostic.args.join(" ")} · READ_ONLY · disposable sandbox baseline`);
