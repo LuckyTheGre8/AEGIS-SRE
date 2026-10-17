@@ -1,6 +1,7 @@
 import { Check, CircleDashed, GitBranch } from "lucide-react";
 import type { InvestigationEvent } from "@/lib/agent/types";
 import { Panel } from "./Panel";
+import type { InvestigationResult } from "@/lib/investigation/result";
 
 const stages = [
   ["Incident prepared", "Validate the incident context"],
@@ -10,7 +11,12 @@ const stages = [
   ["Validate a minimal fix", "Verify in a fresh environment"],
 ];
 
-export function InvestigationTimeline({ event }: { event: InvestigationEvent | null }) {
+export function InvestigationTimeline({ event, result, busy = false }: { event: InvestigationEvent | null; result?: InvestigationResult | null; busy?: boolean }) {
+  if (result) return <Panel title="Investigation" icon={<GitBranch size={16} />} aside={<span className="panel-count">{result.state}</span>}>
+    <div className="timeline investigation-events">{result.events.map((entry) => <div className="timeline-step step-complete" key={entry.id}>
+      <div className="step-marker"><Check size={13} /></div><div><h3>{entry.title}</h3><p>{entry.summary}</p><time dateTime={entry.timestamp}>{entry.state}</time></div>
+    </div>)}</div><div className="panel-note"><CircleDashed size={14} /><span>{result.iterations}/3 model turns · cleanup {result.cleanup} · production NOT EXECUTED</span></div>
+  </Panel>;
   return <Panel title="Investigation" icon={<GitBranch size={16} />} aside={<span className="panel-count">{event ? "01" : "00"} / 05</span>}>
     <div className="timeline">
       {stages.map(([title, description], index) => <div className={`timeline-step ${index === 0 && event ? "step-complete" : ""}`} key={title}>
@@ -20,6 +26,6 @@ export function InvestigationTimeline({ event }: { event: InvestigationEvent | n
         </div>
       </div>)}
     </div>
-    <div className="panel-note"><CircleDashed size={14} /><span>{event ? "Incident ready. Execution arrives in a later milestone." : "Your investigation starts with an incident."}</span></div>
+    <div className="panel-note"><CircleDashed size={14} /><span>{busy ? "Model, policy, sandbox evidence, then cleanup. Waiting for the bounded run…" : event ? "Incident accepted. The bounded investigator is starting." : "Your investigation starts with an incident."}</span></div>
   </Panel>;
 }

@@ -1,5 +1,9 @@
 # Documentation and environment check
 
+## v0.3 update — 18 October 2026
+
+Checked Google's official structured-output guide and generateContent reference, and verified model availability through the live catalog. The live API requires `responseFormat.text.mimeType: APPLICATION_JSON`, despite the guide's lowercase example. The real acceptance run succeeded after following the API enum. See [v0.3 notes](V0.3.md). Read installed Next.js route-handler guidance before adding the investigation endpoint. Rechecked Stripe Projects guidance/status; no service provisioning was required. Only Gemini was wired behind LLMProvider.
+
 ## v0.2 update — 18 October 2026
 
 Rechecked the official SDK quickstart and installed current package `0.8.2`. Read the exact client, command, cleanup, catalog, error, and option types/source. The quickstart's `wait: false` and `waitTimeoutMs` guidance is stale for this SDK: the installed API makes creation synchronous and deprecates those options. The adapter uses `timeoutMs` instead. SDK exec outputs map from `result.stdout`, `result.stderr`, `result.exit_code`, and `exec_ms`.

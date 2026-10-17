@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Aegis SRE — Investigation workspace",
-  description: "Evidence-driven incident investigation. Aegis SRE v0.2 real CreateOS smoke test.",
+  description: "Aegis SRE v0.3: bounded Gemini recommendations, deterministic policy and real CreateOS baseline evidence.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

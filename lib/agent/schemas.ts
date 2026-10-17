@@ -16,10 +16,11 @@ export const IncidentInputSchema = z.strictObject({
 
 export const AgentActionSchema = z.strictObject({
   action: z.enum(["inspect_context", "execute_diagnostic", "generate_tool", "propose_fix", "finish"]),
-  reason: z.string().trim().min(1).max(2000),
+  reason: z.string().trim().min(1).max(240),
   hypothesisId: z.string().min(1).optional(),
   risk: RiskSchema,
   expectedEvidence: z.array(z.string().min(1).max(500)).max(20).default([]),
+  diagnostic: z.enum(["runtime", "listeners", "none"]).optional(),
 });
 
 export const EvidenceSchema = z.strictObject({

@@ -1,5 +1,13 @@
 # Progress
 
+## v0.3.0 — Bounded Gemini investigation
+
+Acceptance passed on 18 October 2026 (Asia/Calcutta). Implemented LLMProvider with Gemini only, strict Hypothesis/Evidence/AgentAction decisions, bounded transitions, deterministic policy, and existing-panel displays for hypotheses, confidence, provenance, command output, and concise action rationales. No generated tools, patches, production actions, or unrelated refactor were added.
+
+The approved synthetic browser run used Gemini `gemini-3.5-flash-lite` and a real disposable CreateOS sandbox. Two model turns produced an allowed `node --version` diagnostic, actual stdout `v24.21.0`, empty stderr, exitCode 0, durationMs 70.963, and confirmed DESTROYED cleanup. Final state COMPLETED, outcome INCONCLUSIVE, production NOT_EXECUTED. See [the actual receipt](evidence/investigation-v0.3.json) and [scope/API notes](V0.3.md).
+
+`npm run lint`, `npm run typecheck`, all **21 tests**, and `npm run build` passed. Browser verification showed hypotheses/confidence/evidence/policy and confirmed cleanup. Credentials remained server-only. Stripe Projects status was rechecked; no services or deployment were added. v0.3 stops at this acceptance milestone.
+
 ## v0.2.0 — Real CreateOS
 
 Acceptance passed on 18 October 2026 (Asia/Calcutta):
