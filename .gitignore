@@ -5,3 +5,13 @@
 .env
 .env.*
 !.env.example
+
+# Next.js and local tooling
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.DS_Store
